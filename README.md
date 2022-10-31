@@ -88,7 +88,7 @@ Default value: "Please Restart"
 Default value: "\*\*Please save your work and restart\*\*"
 #### NormalMessage \<string\>
 
-Default value: "In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
+Default value: "In order to keep your system healthy and secure it needs to be restarted.  \\n\*\*Please save your work\*\* and restart as soon as possible."
 #### NotificationMessage \<string\>
 
 Default value: "In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
