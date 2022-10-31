@@ -79,6 +79,7 @@ Example: If a device is is past the uptime threshold and not within a deferral t
 The minimum number of hours between when a user is notified that they need to restart. This is clocked in calendar time, not device uptime.
 Example: A user receives a notification center event from Renew. If this value is set to 4, then the user will not receive another Renew event until that 4 hour duration has passed (regardless if the script runs again via LaunchAgent or otherwise).
 ### Optional Arguments
+Keep in mind that [Swift Dialog](https://github.com/) uses MarkDown to display text formatting. You should be able to pass this markdown directly from your configuration file as shown in the examples below.
 #### Title \<string\>
 The Title of the Notification and Swift Dialog messages. See <--title> option of [Swift Dialog](https://github.com/)
 
