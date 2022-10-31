@@ -3,6 +3,7 @@
 Renew is a shell script for macOS meant to be run on regular intervals to encourage users to restart their computers on a regular basis. Notifications can become progressively more aggressive if the user chooses to defer their restart beyond the configured threshold.
 
 ## Dependencies
+macOS 11+ is required (Swift Dialog dependency)
 Swift Dialog v.2.0 or newer https://github.com/bartreardon/swiftDialog
 A configuration profile (either locally installed mobileconfig or delivered via MDM)
 A means to initiate the script (typically a LaunchAgent)
@@ -29,6 +30,15 @@ If the user ignores the notifications beyhond the configured notification thresh
 If the user ignores the deferral Swift Dialog windows beyond the threshold, Renew enters "Aggressive" mode and the user has no more deferral options and will be presented only with a button consenting to a restart.
 
 Renew will never initiate a restart of a workstation without the user clicking the button to consent to it. Actions are taken dependent upon Swift Dialog exit codes, and exit code 3 is used to initiate a reboot (aka the Information Button). All other exit codes either immediately exit Renew.
+
+## Installation Details
+Renew consists of a single shell script, typically installed to </usr/local/renew.sh>
+An optional LaunchAgent is also provided, it will call the script every 30 minutes at :15 and :45 
+If you use our provided LaunchAgent, you  may want to also provide a Managed Background Items MDM payload to prevent the user from turing off the Login Item in macOS 13+. The Label to enforce is: <com.secondsonconsulting.renew>
+A mobileconfig file is also required in order to dictate the user experience and script behavior.
+If you plan to use the "Notifications" options you may also wish to deliver a Notifications Profile via MDM to ensure the user gets the Notification Center events.
+
+**A PKG installer that places the script and the LaunchAgent may also be provided, however at this time it will not be a signed package**
 
 ## Configuration Details
 The behavior of the Renew script is dependent upon values entered into the configuration file. 
@@ -58,7 +68,7 @@ Default value: "**Please save your work and restart**"
 #### NormalMessage \<string\>
 
 Default value: "In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
-#### NotificationMessage
+#### NotificationMessage \<string\>
 
 Default value: "In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
 #### NotificationIcon \<string\>
@@ -66,14 +76,18 @@ Path to an icon you would like included in the Notification Center message.
 Please note: Due to limitations on how macOS works, the prominent icon of a Notification Center message will always be the Dialog.app icon. See [Swift Dialog](https://github.com/) documentation for more details.
 
 Default value: ""
-#### MessageIcon
-The icon which will be used for Renew Swift Dialog windows.
+#### MessageIcon \<string\>
+Path to the icon which will be used for Renew Swift Dialog windows. This can be a locally stored file, an SF Symbol, an App Bundle, or a hosted file. See [Swift Dialog](https://github.com/) documentation for details.
+
 Default value: "SF=bolt.circle color1=pink color2=blue"
-#### AdditionalDialogOptions
+#### AdditionalDialogOptions  \<string\>
 Any additional Swift Dialog options you wish to include can be provided here. This was tested primarily with --titlefont and --messagefont options, but other compatible Swift Dialog options will likely work. See [Swift Dialog](https://github.com/) documentation for options and formatting.
 Default value: ""
-#### SecretQuitKey
+#### SecretQuitKey  \<string\>
 By default, Swift Dialog can be quit using the CMD+Q option. This is undesirable for our purposes, and so a "secret quit key" is set by default and can be changed in the configuration file. 
+This must be a single character, and cannot be a capital letter or symbol requiring the shift key.
 **To quit a Renew message without being required to restart, use CMD+] or CMD + your Secret Quit Key.**
 Default value: "]"
 
+## Command-Line Arguments
+Typically Renew should be called 
