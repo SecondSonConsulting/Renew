@@ -35,6 +35,6 @@ The behavior of the Renew script is dependent upon values entered into the confi
 The profile domain is <com.secondsonconsulting.renew> 
 Renew will run with default english language messaging if provided with only the required arguments keys, and can be customized by including any or all of the optional arguments keys.
 ### Required Arguments
-#### MaximumDeferrals <integer>
+#### MaximumDeferrals \<integer\>
 This is the maximum number of deferrals a user receives before Renew enters "Aggressive" mode. 
 #### UptimeThreshold <integer>
