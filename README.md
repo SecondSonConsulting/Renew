@@ -34,7 +34,8 @@ Renew will never initiate a restart of a workstation without the user clicking t
 ## Installation Details
 Renew consists of a single shell script, typically installed to </usr/local/renew.sh>
 An optional LaunchAgent is also provided, it will call the script every 30 minutes at :15 and :45 
-If you use our provided LaunchAgent, you  may want to also provide a Managed Background Items MDM payload to prevent the user from turing off the Login Item in macOS 13+. The Label to enforce is:     com.secondsonconsulting.renew
+If you use our provided LaunchAgent, you  may want to also provide a Managed Background Items MDM payload to prevent the user from turing off the Login Item in macOS 13+. The Label to enforce is:
+    com.secondsonconsulting.renew
 A mobileconfig file is also required in order to dictate the user experience and script behavior.
 If you plan to use the "Notifications" options you may also wish to deliver a Notifications Profile via MDM to ensure the user gets the Notification Center events.
 
