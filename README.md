@@ -81,6 +81,7 @@ Example: A user receives a notification center event from Renew. If this value i
 ### Optional Arguments
 #### Title \<string\>
 The Title of the Notification and Swift Dialog messages. See <--title> option of [Swift Dialog](https://github.com/)
+
 Default value: "Please Restart"
 #### AggroMessage \<string\>
 
@@ -107,6 +108,7 @@ Default value: ""
 By default, Swift Dialog can be quit using the CMD+Q option. This is undesirable for our purposes, and so a "secret quit key" is set by default and can be changed in the configuration file. 
 This must be a single character, and cannot be a capital letter or symbol requiring the shift key.
 **To quit a Renew message without being required to restart, use CMD+] or CMD + your Secret Quit Key.**
+
 Default value: "]"
 
 ## Command-Line Arguments
