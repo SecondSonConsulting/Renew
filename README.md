@@ -85,7 +85,7 @@ The Title of the Notification and Swift Dialog messages. See <--title> option of
 Default value: "Please Restart"
 #### AggroMessage \<string\>
 
-Default value: "**Please save your work and restart**"
+Default value: "\*\*Please save your work and restart\*\*"
 #### NormalMessage \<string\>
 
 Default value: "In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
