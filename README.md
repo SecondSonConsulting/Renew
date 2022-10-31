@@ -79,7 +79,7 @@ Example: If a device is is past the uptime threshold and not within a deferral t
 The minimum number of hours between when a user is notified that they need to restart. This is clocked in calendar time, not device uptime.
 Example: A user receives a notification center event from Renew. If this value is set to 4, then the user will not receive another Renew event until that 4 hour duration has passed (regardless if the script runs again via LaunchAgent or otherwise).
 ### Optional Arguments
-Keep in mind that [Swift Dialog](https://github.com/) uses MarkDown to display text formatting. You should be able to pass this markdown directly from your configuration file as shown in the examples below.
+Keep in mind that [Swift Dialog](https://github.com/bartreardon/swiftDialog) uses MarkDown to display text formatting. You should be able to pass this markdown directly from your configuration file as shown in the examples below.
 #### Title \<string\>
 The Title of the Notification and Swift Dialog messages. See <--title> option of [Swift Dialog](https://github.com/)
 
@@ -95,7 +95,7 @@ Default value: "In order to keep your system healthy and secure it needs to be r
 Default value: "In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
 #### NotificationIcon \<string\>
 Path to an icon you would like included in the Notification Center message.
-Please note: Due to limitations on how macOS works, the prominent icon of a Notification Center message will always be the Dialog.app icon. See [Swift Dialog](https://github.com/) documentation for more details.
+Please note: Due to limitations on how macOS works, the prominent icon of a Notification Center message will always be the Dialog.app icon. See [Swift Dialog](https://github.com/bartreardon/swiftDialog) documentation for more details.
 
 Default value: ""
 #### MessageIcon \<string\>
@@ -103,7 +103,7 @@ Path to the icon which will be used for Renew Swift Dialog windows. This can be 
 
 Default value: "SF=bolt.circle color1=pink color2=blue"
 #### AdditionalDialogOptions  \<string\>
-Any additional Swift Dialog options you wish to include can be provided here. This was tested primarily with --titlefont and --messagefont options, but other compatible Swift Dialog options will likely work. See [Swift Dialog](https://github.com/) documentation for options and formatting.
+Any additional Swift Dialog options you wish to include can be provided here. This was tested primarily with --titlefont and --messagefont options, but other compatible Swift Dialog options will likely work. See [Swift Dialog](https://github.com/bartreardon/swiftDialog) documentation for options and formatting.
 Default value: ""
 #### SecretQuitKey  \<string\>
 By default, Swift Dialog can be quit using the CMD+Q option. This is undesirable for our purposes, and so a "secret quit key" is set by default and can be changed in the configuration file. 
