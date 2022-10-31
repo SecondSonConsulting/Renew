@@ -2,7 +2,7 @@
 ## Overview
 Renew is a shell script for macOS meant to be run on regular intervals to encourage users to restart their computers on a regular basis. Notifications can become progressively more aggressive if the user chooses to defer their restart beyond the configured threshold.
 ## Why?
-Regularly restarting your workstation is an important part of keeping it running and secure. Application updates, MDM commands, and security software runs more efficiently when the computer is allowed to restart on a regular basis. We have found that 10-14 day restarts are ideal to keeping things working as expected.
+Regularly restarting your workstation is an important part of keeping it running healthy and secure. Application updates, MDM commands, and security software will run more efficiently when the computer is allowed to restart on a regular basis. We have found that 10-14 day restarts are ideal to keeping things working as expected.
 
 ## Dependencies
 macOS 11+ is required (Swift Dialog dependency)
@@ -17,7 +17,7 @@ It should be obvious to anyone familiar with [Nudge](https://github.com/macadmin
 
 A huge thanks to Bart Reardon for creating and maintaining [Swift Dialog](https://github.com/bartreardon/swiftDialog). Without this tool, Renew would not have been possible.
 
-A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @Brock Walters and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
+A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @Brock Walters @Josh Rickets and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
 
 ## Screenshots
 ### Notification Mode Default User Experience
