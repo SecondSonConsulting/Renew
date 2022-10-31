@@ -1,6 +1,8 @@
 # Renew
 ## Overview
 Renew is a shell script for macOS meant to be run on regular intervals to encourage users to restart their computers on a regular basis. Notifications can become progressively more aggressive if the user chooses to defer their restart beyond the configured threshold.
+## Why?
+Regularly restarting your workstation is an important part of keeping it running and secure. Application updates, MDM commands, and security software runs more efficiently when the computer is allowed to restart on a regular basis. We have found that 10-14 day restarts are ideal to keeping things working as expected.
 
 ## Dependencies
 macOS 11+ is required (Swift Dialog dependency)
@@ -11,11 +13,15 @@ A means to initiate the script (typically a LaunchAgent)
 ## Thank you!
 This project is made possible by the awesome folks on the MacAdmins slack for their support and community projects.
 
-It should be obvious to anyone familiar with [Nudge](https://github.com/macadmins/nudge) that this project is heavily influenced by it. Thank you Erik Gomez for all of your work on that tool and providing your hard work to the community for free.
+It should be obvious to anyone familiar with [Nudge](https://github.com/macadmins/nudge) that this project is heavily influenced by it. Thank you Erik Gomez for providing your hard work to the community for free.
 
 A huge thanks to Bart Reardon for creating and maintaining [Swift Dialog](https://github.com/bartreardon/swiftDialog). Without this tool, Renew would not have been possible.
 
 A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @Brock Walters and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
+
+## Screenshots
+###NEEDS REFERENCE IMAGES###
+![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-AggressiveDefaultDialog.png?raw=true)
 
 ## How it works
 Renew is meant to be run on regular intervals throughout the day. It was designed to be used with a LaunchAgent which runs every 30 minutes, and an example LaunchAgent is provided.
@@ -34,10 +40,16 @@ Renew will never initiate a restart of a workstation without the user clicking t
 ## Installation Details
 Renew consists of a single shell script, typically installed to </usr/local/renew.sh>
 An optional LaunchAgent is also provided, it will call the script every 30 minutes at :15 and :45 
-If you use our provided LaunchAgent, you  may want to also provide a Managed Background Items MDM payload to prevent the user from turing off the Login Item in macOS 13+. The Label to enforce is:
+If you use our provided LaunchAgent, you  may want to also provide a Managed Background Items MDM payload to prevent the user from turing off the Login Item in macOS 13+. 
+The Label to enforce is:
     com.secondsonconsulting.renew
 A mobileconfig file is also required in order to dictate the user experience and script behavior.
 If you plan to use the "Notifications" options you may also wish to deliver a Notifications Profile via MDM to ensure the user gets the Notification Center events.
+Renew will generate its own configuration plist files located at:
+    ~/Library/Preferences/com.secondsonconsulting.renew.plist
+This plist can be deleted at any time to reset the user deferral counts without adversely impacting how Renew works.
+**Renew should always be invoked as a currently logged in user, NOT as root.**
+Installing the PKG file requires administrator access to set permissions on the script and to create the Global Launch Agent.
 
 **A PKG installer that places the script and the LaunchAgent may also be provided, however at this time it will not be a signed package**
 
@@ -91,4 +103,15 @@ This must be a single character, and cannot be a capital letter or symbol requir
 Default value: "]"
 
 ## Command-Line Arguments
-Typically Renew should be called 
+Typically Renew should be called just by itself, however some command line arguments have been provided in order to facilitate testing.
+There are no valid combinations of command line options, only one option should be included at any time.
+**Renew should always be invoked as a currently logged in user, NOT as root.**
+### --reset
+This argument will reset the user's deferral profile to all zeros
+### --force-aggro
+This argument will force a SwiftDialog window with the "Aggressive Mode" options regardless of the current uptime or deferral options.
+Tip: Remember you can use the SecretQuitKey to dismiss this without having to restart during testing.
+### --force-normal
+This argument will force a SwiftDialog window with the "Normal Mode" options regardless of the current uptime or deferral options.
+### --force-notification
+This argument will force a SwiftDialog Notification Center event regardless of the current uptime or deferral options.
