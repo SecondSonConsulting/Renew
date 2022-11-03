@@ -1,0 +1,571 @@
+#!/bin/zsh
+#set -x
+
+##Renew.sh
+scriptVersion="Beta 0.1.5"
+
+#Written by Trevor Sysock (aka @bigmacadmin) at Second Son Consulting Inc.
+
+###FEATURE ENHANCEMENTS WANTED:
+#Set config file variable for how many days when aggro mode becomes the default (45 days uptime, no deferrals offered.)
+
+#Multi-language support
+##Need to fix line "Remaining deferrals until forced restart: "
+
+##SHOWSTOPPER FIXES NEEDED
+
+##################################################################
+#
+# This section sets up the basic variables, functions, and validation
+#
+##################################################################
+
+##Current user/home used to set the deferral plist
+##Each user on a system will have its own deferral count and log
+
+# Get the currently logged in user
+currentUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
+
+# Current User home folder
+userHomeFolder=$(dscl . -read /users/${currentUser} NFSHomeDirectory | cut -d " " -f 2)
+
+#Define folder and log file name
+logDir="$userHomeFolder/Library/Application Support/Renew"
+logFile="$logDir"/Renew.log
+
+#Check if the log folder exists, if not then make it. 
+if [ ! -d "$logDir" ]; then
+	mkdir -p "$logDir"
+fi
+
+#Test if we can write to the log file
+echo "$(date): Renew script initiated" >> "$logFile" || { echo "ERROR: Cannot write to log file. Exiting" ; exit 1 ; }
+	
+#Used only for debugging. Gives feedback into standard out if dryRun=1, also to $logFile if you set it
+function debug_message()
+{
+
+if [ -e "$logFile" ]; then
+	/bin/echo "$(date): $*" >> "$logFile"
+fi
+
+if [ "$dryRun" = 1 ]; then
+	/bin/echo "DEBUG: $*"
+fi
+
+}
+
+#Path to mobileconfig payload
+renewConfig="/Library/Managed Preferences/com.secondsonconsulting.renew.plist"
+
+#Path to swiftDialog binary
+dialogPath='/usr/local/bin/dialog'
+
+#Path to Plist Buddy for convenience and readability
+pBuddy='/usr/libexec/PlistBuddy'
+
+#Path to User deferral file
+userDeferralProfile="$userHomeFolder/Library/Preferences/com.secondsonconsulting.renew.user.plist"
+
+#This is up top so that it runs even if no validation succeeds.
+if [ "$1" = "--version" ]; then
+	debug_message "--version argument passed. Printing version information and exiting."
+	echo "Renew.sh version: $scriptVersion"
+	echo "SwiftDialog Version: $($dialogPath --version)"
+	exit 0
+fi
+
+#Exit if there is no mobileconfig payload
+if [ ! -f "$renewConfig" ]; then
+	debug_message "Configuration profile missing. Exiting."
+	exit 0
+fi
+
+#Exit if swiftDialog dependency isn't installed
+if [ ! -e "$dialogPath" ]; then
+	debug_message "ERROR: Missing dependency: SwiftDialog"
+	exit 1
+fi
+
+#This function confirms read/write permissions to the user deferral profile
+if "$pBuddy" -c "Add :TestPerms integer 0" "$userDeferralProfile" >/dev/null 2>&1; then
+	"$pBuddy" -c "Delete :TestPerms" "$userDeferralProfile" >/dev/null 2>&1
+else
+	debug_message "ERROR: Failed to properly write to $userDeferralProfile - Exiting."
+	echo "ERROR: Failed to properly right to $userDeferralProfile - Exiting."
+	exit 1
+fi
+
+#This is the help dialog explaining the options and how to use
+help_message()
+{
+cat <<HELPMESSAGE
+NAME
+	/usr/local/Renew.sh
+
+SYNOPSIS
+	/usr/local/Renew.sh [ --reset | --dry-run | --force-aggro | --force-normal | --force-notification | --help ]
+	
+DESCRIPTION
+	The Renew script is designed to be run on regular intervals (about every 30 minutes, typically via a Global Launch Agent).
+	In normal usage, no additional arguments are required. The Options below are primarily for testing.
+	Multiple options are not supported, only one option can be chosen at a time.
+
+OPTIONS
+	--reset					This will reset the user's deferral profile to reset the Renew experience
+
+	--dry-run				Disables the restart/quit functionality of the "Restart" button for testing purposes.
+
+	--force-aggro			Aggressive mode will be executed regardless of deferrals or uptime.
+
+	--force-normal			Normal mode will be executed regardless of deferrals or uptime.
+
+	--force-notification	Notification mode will be executed regardless of deferrals or uptime.
+
+	--version				Print the version of Renew and Dialog and exit.
+	
+	--help					Print this help message and exit.
+
+HELPMESSAGE
+
+}
+
+##################################################################
+#
+# This section sets the primary functions of the script
+# and identifies if testing parameters were provided at commmand line
+#
+##################################################################
+
+#This function resets deferrals for the logged in user.
+function reset_deferral_profile ()
+{
+
+defaults delete "$userDeferralProfile" >/dev/null 2>&1
+
+"$pBuddy" -c "Add :CurrentDeferralCount integer 0" "$userDeferralProfile" >/dev/null 2>&1
+"$pBuddy" -c "Add :NotificationCount integer 0" "$userDeferralProfile" >/dev/null 2>&1
+"$pBuddy" -c "Add :ActiveDeferral integer 0" "$userDeferralProfile" >/dev/null 2>&1
+"$pBuddy" -c "Add :HumanReadableDeferDate string 0" "$userDeferralProfile" >/dev/null 2>&1
+
+}
+
+##Check for testing parameters. This section could be redone using getopts, but the purpose of this script is not to be used with arguments. Arguments are just for testing, and are limited to 1 argument each run.
+
+if [ -n "$2" ]; then
+	debug_message "ERROR: Invalid arguments: $@"
+	exit 1
+elif [ "$1" = "--dry-run" ]; then
+	debug_message "--dry-run used. Device will not restart during this run."
+	dryRun=1
+elif  [ "$1" = "--force-aggro" ]; then
+	debug_message "--force-aggro used. Aggressive mode will be executed regardless of deferrals or uptime."
+	forceAggro=1
+elif [ "$1" = "--force-normal" ]; then
+	debug_message "--force-normal used. Normal mode will be executed regardless of deferrals or uptime."
+	forceNormal=1
+elif [ "$1" = "--force-notification" ]; then
+	debug_message "--force-notification used. Notification mode will be executed regardless of deferrals or uptime."
+	forceNotification=1
+elif [ "$1" = "--reset" ]; then
+	debug_message "--reset used. Resetting deferral profile and exiting."
+	reset_deferral_profile
+	exit 0
+elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+	debug_message "--help used. Printing help message and exiting."
+	help_message
+	exit 0
+elif [ "$1" = "" ]; then
+	debug_message "No testing arguments passed during execution."
+else
+	debug_message "ERROR: Invalid arguments given. Printing help message and exiting."
+	help_message
+	exit 1
+fi
+
+#Ensure the user deferral file exists with valid entries
+#If any of these commands fail, reset and rebuild
+debug_message "Validating user deferral profile plist"
+"$pBuddy" -c "Print :CurrentDeferralCount" "$userDeferralProfile" >/dev/null 2>&1 || validationFail=1
+"$pBuddy" -c "Print :NotificationCount" "$userDeferralProfile" >/dev/null 2>&1 || validationFail=1
+"$pBuddy" -c "Print :ActiveDeferral" "$userDeferralProfile" >/dev/null 2>&1 || validationFail=1
+
+if [ "$validationFail" = 1 ]; then
+	debug_message "WARNING: User deferral profile plist FAILED validation. Resetting."
+	reset_deferral_profile
+else
+	debug_message "User deferral profile plist validated successfully"
+fi
+
+#This function validates whether a preference option exists in the configuration file or not
+#If the required preference value doesn't exist, exit
+function validate_required_argument()
+{
+
+"$pBuddy" -c "Print $1" "$renewConfig" >/dev/null 2>&1  \
+	&& debug_message "Required Argument found: $1" \
+	|| { debug_message "ERROR: Required Argument missing: $1" ; exit 2 ; }
+
+}
+
+#Perform validation of Required Arguments. Script exits if required arguments are missing.
+validate_required_argument ":RequiredArguments:UptimeThreshold"
+validate_required_argument ":RequiredArguments:MaximumDeferrals"
+validate_required_argument ":RequiredArguments:DeferralDuration"
+validate_required_argument ":RequiredArguments:NotificationThreshold"
+
+#Setting variables based on mobileconfig profile - RequiredArguments
+uptimeThreshold=$("$pBuddy" -c "Print :RequiredArguments:UptimeThreshold" "$renewConfig")
+maximumDeferrals=$("$pBuddy" -c "Print :RequiredArguments:MaximumDeferrals" "$renewConfig")
+deferralDuration=$("$pBuddy" -c "Print :RequiredArguments:DeferralDuration" "$renewConfig")
+notificationThreshold=$("$pBuddy" -c "Print :RequiredArguments:NotificationThreshold" "$renewConfig")
+
+#Check if there is a deferral count already, and set it to 0 or current value.
+currentDeferralCount=$("$pBuddy" -c "Print :CurrentDeferralCount" "$userDeferralProfile" 2>/dev/null)
+
+#Check if there is a value for an active deferral
+activeDeferral=$("$pBuddy" -c "Print :ActiveDeferral" "$userDeferralProfile" 2>/dev/null)
+
+#Set value for how many notifications have been completed
+notificationCount=$("$pBuddy" -c "Print :NotificationCount" "$userDeferralProfile")
+
+#Do math to determine remaining deferrals
+deferralsRemaining=$((maximumDeferrals-currentDeferralCount))
+
+#Setting variables based on mobileconfig profile - OptionalArguments
+#If no argument is given in the config file, set the script default
+
+#Define script default messaging/icons
+defaultDialogIcon="SF=bolt.circle color1=pink color2=blue"
+defaultNotificationIcon=""
+defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
+defaultDialogAggroMessage="**Please save your work and restart**"
+defaultDialogNotificationMessage="In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
+defaultDialogTitle="Please Restart"
+defaultDialogAdditionalOptions=""
+defaultDialogAggressiveOptions=""
+defaultSecretQuitKey="]"
+
+#Now do the logic to set the variables that will actually be used
+#This is tedious code that could be simplified with a function, but i couldn't get my brain around it
+
+if "$pBuddy" -c "Print :OptionalArguments:MessageIcon" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogIcon=$("$pBuddy" -c "Print :OptionalArguments:MessageIcon" "$renewConfig")
+	#If an icon is defined, but the file doesnt exist, fall back to default.
+	if [ ! -e "$dialogIcon" ]; then
+		dialogIcon="$defaultDialogIcon"
+	fi	
+else
+	dialogIcon="$defaultDialogIcon"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:NotificationIcon" "$renewConfig" >/dev/null 2>&1 ; then
+	notificationIcon=$("$pBuddy" -c "Print :OptionalArguments:NotificationIcon" "$renewConfig")
+	#If an icon is defined, but the file doesnt exist, fall back to default.
+	if [ ! -e "$notificationIcon" ]; then
+		notificationIcon="$defaultNotificationIcon"
+	fi	
+else
+	notificationIcon="$defaultNotificationIcon"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:NormalMessage" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogNormalMessage=$("$pBuddy" -c "Print :OptionalArguments:NormalMessage" "$renewConfig")
+else
+	dialogNormalMessage="$defaultDialogNormalMessage"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:AggroMessage" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogAggroMessage=$("$pBuddy" -c "Print :OptionalArguments:AggroMessage" "$renewConfig")
+else
+	dialogAggroMessage="$defaultDialogAggroMessage"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:NotificationMessage" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogNotificationMessage=$("$pBuddy" -c "Print :OptionalArguments:NotificationMessage" "$renewConfig")
+else
+	dialogNotificationMessage="$defaultDialogNotificationMessage"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:Title" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogTitle=$("$pBuddy" -c "Print :OptionalArguments:Title" "$renewConfig")
+else
+	dialogTitle="$defaultDialogTitle"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:AdditionalDialogOptions" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogAdditionalOptions=$("$pBuddy" -c "Print :OptionalArguments:AdditionalDialogOptions" "$renewConfig")
+else
+	dialogAdditionalOptions="$defaultDialogAdditionalOptions"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:AdditionalAggressiveOptions" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogAggressiveOptions=$("$pBuddy" -c "Print :OptionalArguments:AdditionalAggressiveOptions" "$renewConfig")
+else
+	dialogAggressiveOptions="$defaultDialogAggressiveOptions"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:SecretQuitKey" "$renewConfig" >/dev/null 2>&1 ; then
+	secretQuitKey=$("$pBuddy" -c "Print :OptionalArguments:SecretQuitKey" "$renewConfig")
+else
+	secretQuitKey="$defaultSecretQuitKey"
+fi
+
+#Define what happens when Aggressive mode is engaged
+function exec_aggro_mode()
+{
+
+debug_message "Executing aggressive mode"
+
+#go aggro
+
+	"$dialogPath" -o \
+	--title "$dialogTitle" \
+	--button1text "No deferrals remaining" \
+	--button1disabled \
+	--infobuttontext "OK, Restart Now I am Ready" \
+	--icon "$dialogIcon" \
+	--messagealignment centre \
+	--centericon \
+	--messagealignment center \
+	--quitkey "$secretQuitKey" \
+	$(echo $dialogAdditionalOptions) \
+	$(echo $dialogAggressiveOptions) \
+	--message "$dialogAggroMessage" \
+	
+	#Set exit code based on user input
+	dialogExitCode=$?
+	
+}
+
+#Define what happens when  Normal mode is engaged
+function exec_normal_mode()
+
+{
+
+debug_message "Executing normal mode"
+
+
+#go normal
+	
+	"$dialogPath" -o \
+	--title "$dialogTitle" \
+	--infobuttontext "OK, Restart Now I am Ready" \
+	--button1text "Not now, remind me later..." \
+	--centericon \
+	--icon "$dialogIcon" \
+	--messagealignment centre \
+	--quitkey "$secretQuitKey" \
+	$(echo $dialogAdditionalOptions) \
+	--message "$dialogNormalMessage\n\nIf you can't restart now, you can defer $deferralsRemaining more times." \
+
+	#Set exit code based on user input
+	dialogExitCode=$?
+
+}
+
+#Define what happens when Notification mode is engaged
+function exec_notification_mode()
+{
+
+debug_message "Executing notification mode"
+
+#go notification
+
+	"$dialogPath" \
+	--notification \
+	--title "$dialogTitle" \
+	--icon "$notificationIcon" \
+	--message "$dialogNotificationMessage" \
+	
+	((notificationCount=notificationCount+1))
+	"$pBuddy" -c "Set :NotificationCount $notificationCount" "$userDeferralProfile"
+	
+	exec_deferral
+	
+	exit 0
+}
+
+#This function adds to the deferral count and sets an active deferral time
+function exec_deferral()
+{
+	debug_message "Executing deferral process."
+	((currentDeferralCount=currentDeferralCount+1))
+	debug_message "New current deferral count: $currentDeferralCount"
+	"$pBuddy" -c "Set :CurrentDeferralCount $currentDeferralCount" "$userDeferralProfile"
+	debug_message "New defer until value: $deferUntil"
+	"$pBuddy" -c "Set :ActiveDeferral $deferUntil" "$userDeferralProfile"
+	debug_message "New human readabale deferral date: $humanReadableDeferDate"
+	"$pBuddy" -c "Set :HumanReadableDeferDate $humanReadableDeferDate" "$userDeferralProfile"
+}
+
+#If the --dry-run flag is passed as a script argument for testing, then the reboot button doesn't actually reboot
+if [ "$dryRun" = 1 ]; then
+
+function exec_restart()
+{
+	debug_message "DRY-RUN: Restart would happen here"
+	exit 0
+}
+
+else
+
+#This is the proper reboot function, thanks to: @Charles Mangin in Mac Admins slack (who in turns gave thanks to https://community.jamf.com/t5/user/viewprofilepage/user-id/73522 )
+function exec_restart()
+{
+
+debug_message "Executing restart!"
+
+#Throw in sleep 5 just for good measure (Let people save, let techs bail by cancelling the script)
+sleep 5
+
+timeout=60
+
+#Teams is weird and bad and doesn't seem to reliably quit properly, so lets do this first.
+osascript -e 'quit app "Microsoft Teams"'
+
+osascript <<EOF
+tell application "System Events" to set quitapps to name of every application process whose visible is true and name is not "Finder"
+repeat with closeall in quitapps
+try
+	with timeout of ${timeout} seconds
+		quit application closeall
+	end timeout
+end try
+end repeat
+with timeout of ${timeout} seconds
+	tell application "Finder" to restart
+end timeout
+EOF
+
+#shutdown -r now
+
+}
+
+fi
+
+##################################################################
+#
+# This section does maths
+#
+##################################################################
+
+###Big thanks to Pico on the Mac Admins slack for the logic on the time variables.
+#Determine current Unix epoch time
+current_unix_time="$(date '+%s')"
+
+#This reports the unix epoch time that the kernel was booted
+boot_unix_time="$(sysctl -n kern.boottime | awk -F 'sec = |, usec' '{ print $2; exit }')"
+
+#Get uptime in seconds by doing maths
+uptime_seconds="$(( current_unix_time - boot_unix_time ))"
+
+#I'm spelling out the math in multiple steps because i'm kind of a dummy. This could be one unreadable command, but i prefer this.
+uptime_minutes="$(( uptime_seconds / 60 ))"
+uptime_hours="$(( uptime_minutes / 60 ))"
+uptime_days="$(( uptime_hours / 24 ))"
+
+debug_message "Uptime values are: $uptime_days days = $uptime_hours hours = $uptime_minutes minutes = $uptime_seconds seconds"
+
+deferUntilSeconds=$((deferralDuration * 60 * 60))
+deferUntil=$((current_unix_time+deferUntilSeconds))
+
+debug_message "Defer Until: "$deferUntil" which is $(date -j -f %s $deferUntil)"
+humanReadableDeferDate=$(date -j -f %s $deferUntil)
+
+##################################################################
+#
+# This section processes command line arguments used for testing
+#
+##################################################################
+
+#To reset deferrals, execute sript with /Renew.sh --reset
+if [ "$1" = "--reset" ]; then
+		reset_deferral_profile && debug_message "Resetting deferrals." || { debug_message "ERROR: Could not reset deferral profile. Probably a permissions issue." ; exit 1 ; }
+	exit 0
+fi
+
+#If dryRun is enabled, set uptime days to a value that is sure to trip your policy
+if [ "$dryRun" = 1 ]; then
+	uptime_days=$(( uptimeThreshold+1 ))
+	activeDeferral=0
+	debug_message "DRY-RUN: Setting uptime_days to $uptime_days value for testing purposes."
+fi
+
+#Check if we're forcing aggro for testing
+if [ "$forceAggro" = 1 ]; then
+	uptime_days=$(( uptimeThreshold+1 ))
+	currentDeferralCount=$(( maximumDeferrals+1 ))
+	activeDeferral=0
+	notificationCount=$((notificationThreshold+1))
+	debug_message "FORCE-AGGRO: Setting uptime_days to $uptime_days value for testing purposes."
+fi
+
+#Check if we're forcing normal for testing
+if [ "$forceNormal" = 1 ]; then
+	uptime_days=$(( uptimeThreshold+1 ))
+	activeDeferral=0
+	notificationCount=$((notificationThreshold+1))
+	currentDeferralCount=0
+	debug_message "FORCE-NORMAL: Setting uptime_days to $uptime_days value for testing purposes."
+fi
+
+#Check if we're forcing normal for testing
+if [ "$forceNotification" = 1 ]; then
+	activeDeferral=0
+	debug_message "FORCE-NOTIFICAION: Setting activeDeferral to $activeDeferral for testing purposes."
+	exec_notification_mode
+fi
+
+##################################################################
+#
+# This section has the primary logic that dictates the user experience
+#
+##################################################################
+
+#Are we in a deferral time range? If so, exit quietly.
+if [ $activeDeferral -ge $current_unix_time ]; then
+	debug_message "A deferral is active. Exiting."
+	exit 0
+fi
+
+#First check if the uptime necessitates action. If not, reset all deferrals and exit 0.
+if [ "$uptime_days" -ge "$uptimeThreshold" ]; then
+	#First check if the user has received the desired number of notifications, and if not execute notification mode.
+	if [ "$notificationCount" -lt "$notificationThreshold" ]; then
+		debug_message "Notification count has not met notification threshold."
+		exec_notification_mode
+	fi
+	
+	if [ "$currentDeferralCount" -ge "$maximumDeferrals" ]; then
+		debug_message "Aggressive mode conditions met."
+		exec_aggro_mode
+	else
+		debug_message "Normal mode conditions met."
+		exec_normal_mode
+	fi
+	
+	#User has made a selection. Now we process it.
+	debug_message "DIALOG EXIT CODE: $dialgoExitCode."
+
+	
+	if [[ "$dialogExitCode" = 0 ]]; then
+		debug_message "USER ACTION: User chose deferral."
+		exec_deferral
+	elif [[ "$dialogExitCode" = 10 ]]; then
+		debug_message "USER ACTION: User pressed the secret quit button."
+		exit $dialogExitCode
+	elif [[ "$dialogExitCode" = 3 ]]; then
+		debug_message "USER ACTION: User chose to restart now."
+		exec_restart
+	else
+		debug_message "USER ACTION: Dialog exited with an unexpected code. Possibly it was killed unexpectedly."
+		exit $dialogExitCode
+	fi
+else
+	#No enforcement needed, so we set deferrals to zero
+	debug_message "Device does not need to be restarted."
+	reset_deferral_profile
+fi
+
+exit 0

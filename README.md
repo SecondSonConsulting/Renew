@@ -1,12 +1,15 @@
 # Renew
 ## Overview
 Renew is a shell script for macOS meant to be run on regular intervals to encourage users to restart their computers on a regular basis. Notifications can become progressively more aggressive if the user chooses to defer their restart beyond the configured threshold.
+
+Renew runs as the logged in user and will never restart a computer without a user's consent. 
 ## Why?
 Regularly restarting your workstation is an important part of keeping it running healthy and secure. Application updates, MDM commands, and security software will run more efficiently when the computer is allowed to restart on a regular basis. We have found that 10-14 day restarts are ideal to keeping things working as expected.
 
 ## Dependencies
 macOS 11+ is required (Swift Dialog dependency)
 Swift Dialog v.2.0 or newer https://github.com/bartreardon/swiftDialog
+Swift Dialog - (v.2.0 or newer required for notification center features) https://github.com/bartreardon/swiftDialog
 A configuration profile (either locally installed mobileconfig or delivered via MDM)
 A means to initiate the script (typically a LaunchAgent)
 
@@ -21,14 +24,14 @@ A resounding shoutout to all of the members of the MacAdmins community for their
 
 ## Screenshots
 ### Notification Mode Default User Experience
-![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-NotificationDefault.png?raw=true)
+![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NotificationDefault.png?raw=true)
 ### Normal Mode Default User Experience
-![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-NormalDefaultDialog.png?raw=true)
+![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NormalDefaultDialog.png?raw=true)
 ### Aggressive Mode Default User Experience
-![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-AggressiveDefaultDialog.png?raw=true)
+![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-AggressiveDefaultDialog.png?raw=true)
 ### Custom Fields Ugly Example Image
 This image is only to illustrate how the various options you choose affect the final messaging. Please don't subject your users to this in production.
-![Renew Custom Fields Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-UglyExampleImage.png?raw=true)
+![Renew Custom Fields Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-UglyExampleImage.png?raw=true)
 
 ## How it works
 Renew is meant to be run on regular intervals throughout the day. It was designed to be used with a LaunchAgent which runs every 30 minutes, and an example LaunchAgent is provided.
@@ -68,15 +71,25 @@ Two sample mobileconfig files are provided, one with minimum options required to
 #### MaximumDeferrals \<integer\>
 This is the maximum number of deferrals a user receives before Renew enters "Aggressive" mode.
 Please note that "Notifications" count toward the MaxmimumDeferrals amount even though the user does not interact with them.
+
+**Recommended Value:** 4
 #### UptimeThreshold \<integer\>
 The number of days which a device is online prior to the Renew experience starting. Devices were last powered on fewer than UptimeThreshold days will not receive notifications.
 Example: If a device is powered on October 1st, and the UptimeThreshold is set to 10 days, then the user will begin to be notified on October 11th.
+
+**Recommended Value:** 10
 #### NotificationThreshold \<integer\>
 The numbe of times the user will get a macOS Notification Center event prior to the full Swift Dialog experience.
 Example: If a device is is past the uptime threshold and not within a deferral timeframe, they will be first notified via a notification center event. Renew processes this as a deferral, and exits after sending the notification.
+
+**Note:** This feature requires SwiftDialog 2.0 or greater. If you wish to run without the Notification Center feature, you can set this value to 0.
+
+**Recommended Value:** 2
 #### DeferralDuration \<integer\>
 The minimum number of hours between when a user is notified that they need to restart. This is clocked in calendar time, not device uptime.
 Example: A user receives a notification center event from Renew. If this value is set to 4, then the user will not receive another Renew event until that 4 hour duration has passed (regardless if the script runs again via LaunchAgent or otherwise).
+
+**Recommended Value:** 4
 ### Optional Arguments
 Keep in mind that [Swift Dialog](https://github.com/bartreardon/swiftDialog) uses MarkDown to display text formatting. You should be able to pass this markdown directly from your configuration file as shown in the examples below.
 #### Title \<string\>
