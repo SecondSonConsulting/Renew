@@ -44,21 +44,18 @@ If the user ignores the deferral Swift Dialog windows beyond the threshold, Rene
 
 Renew will never initiate a restart of a workstation without the user clicking the button to consent to it. Actions are taken dependent upon Swift Dialog exit codes, and exit code 3 is used to initiate a reboot (aka the Information Button). All other exit codes either immediately exit Renew.
 
-## Installation Details
-Renew consists of a single shell script, typically installed to </usr/local/renew.sh>
+## Installation and Directories
+Renew consists of a single shell script, typically installed to ```/usr/local/renew.sh```
 An optional LaunchAgent is also provided, it will call the script every 30 minutes at :15 and :45 
 If you use our provided LaunchAgent, you  may want to also provide a Managed Background Items MDM payload to prevent the user from turing off the Login Item in macOS 13+. 
-The Label to enforce is:
-    com.secondsonconsulting.renew
+The Label to enforce is: ```com.secondsonconsulting.renew```
 A mobileconfig file is also required in order to dictate the user experience and script behavior.
 If you plan to use the "Notifications" options you may also wish to deliver a Notifications Profile via MDM to ensure the user gets the Notification Center events.
-Renew will generate its own configuration plist files located at:
-    ~/Library/Preferences/com.secondsonconsulting.renew.plist
+Renew will generate its own configuration plist files located at: ```~/Library/Preferences/com.secondsonconsulting.renew.plist```
 This plist can be deleted at any time to reset the user deferral counts without adversely impacting how Renew works.
 **Renew should always be invoked as a currently logged in user, NOT as root.**
 Installing the PKG file requires administrator access to set permissions on the script and to create the Global Launch Agent.
-Basic logging functionality is included. The Renew log can be found here:
-    ~/Library/Application Support/Renew
+Basic logging functionality is included. The Renew log can be found here: ```~/Library/Application Support/Renew```
 
 **A PKG installer that places the script and the LaunchAgent may also be provided, however at this time it will not be a signed package**
 
