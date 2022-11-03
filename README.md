@@ -57,6 +57,8 @@ Renew will generate its own configuration plist files located at:
 This plist can be deleted at any time to reset the user deferral counts without adversely impacting how Renew works.
 **Renew should always be invoked as a currently logged in user, NOT as root.**
 Installing the PKG file requires administrator access to set permissions on the script and to create the Global Launch Agent.
+Basic logging functionality is included. The Renew log can be found here:
+    ~/Library/Application Support/Renew
 
 **A PKG installer that places the script and the LaunchAgent may also be provided, however at this time it will not be a signed package**
 
