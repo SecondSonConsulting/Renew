@@ -2,15 +2,19 @@
 #set -x
 
 ##Renew.sh
-scriptVersion="Beta 0.1.5"
+scriptVersion="Beta 0.1.6"
 
 #Written by Trevor Sysock (aka @bigmacadmin) at Second Son Consulting Inc.
 
 ###FEATURE ENHANCEMENTS WANTED:
-#Set config file variable for how many days when aggro mode becomes the default (45 days uptime, no deferrals offered.)
+#Set config file variable for how many days when aggro mode becomes the default (i.e. 30 days uptime, no deferrals offered.)
+
+#Application/Camera assertions to prevent popups while sharing screen or using camera.
 
 #Multi-language support
 ##Need to fix line "Remaining deferrals until forced restart: "
+
+#Allow --force-aggro/normal/notification even if config file isn't present
 
 ##SHOWSTOPPER FIXES NEEDED
 
@@ -115,6 +119,7 @@ OPTIONS
 	--reset					This will reset the user's deferral profile to reset the Renew experience
 
 	--dry-run				Disables the restart/quit functionality of the "Restart" button for testing purposes.
+							Also ignores active deferral count and sets uptime to ensure an event is triggered.
 
 	--force-aggro			Aggressive mode will be executed regardless of deferrals or uptime.
 
@@ -416,29 +421,8 @@ function exec_restart()
 
 debug_message "Executing restart!"
 
-#Throw in sleep 5 just for good measure (Let people save, let techs bail by cancelling the script)
-sleep 5
-
-timeout=60
-
-#Teams is weird and bad and doesn't seem to reliably quit properly, so lets do this first.
-osascript -e 'quit app "Microsoft Teams"'
-
-osascript <<EOF
-tell application "System Events" to set quitapps to name of every application process whose visible is true and name is not "Finder"
-repeat with closeall in quitapps
-try
-	with timeout of ${timeout} seconds
-		quit application closeall
-	end timeout
-end try
-end repeat
-with timeout of ${timeout} seconds
-	tell application "Finder" to restart
-end timeout
-EOF
-
-#shutdown -r now
+#This is the restart command. Thank you Dan Snelson: https://snelson.us/2022/07/log-out-restart-shut-down/
+osascript -e 'tell app "loginwindow" to «event aevtrrst»'
 
 }
 
