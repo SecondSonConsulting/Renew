@@ -2,7 +2,7 @@
 #set -x
 
 ##Renew.sh
-scriptVersion="Beta 0.1.6"
+scriptVersion="Beta 0.1.7"
 
 #Written by Trevor Sysock (aka @bigmacadmin) at Second Son Consulting Inc.
 
