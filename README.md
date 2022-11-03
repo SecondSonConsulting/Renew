@@ -24,14 +24,14 @@ A resounding shoutout to all of the members of the MacAdmins community for their
 
 ## Screenshots
 ### Notification Mode Default User Experience
-![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-NotificationDefault.png?raw=true)
+![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NotificationDefault.png?raw=true)
 ### Normal Mode Default User Experience
-![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-NormalDefaultDialog.png?raw=true)
+![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NormalDefaultDialog.png?raw=true)
 ### Aggressive Mode Default User Experience
-![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-AggressiveDefaultDialog.png?raw=true)
+![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-AggressiveDefaultDialog.png?raw=true)
 ### Custom Fields Ugly Example Image
 This image is only to illustrate how the various options you choose affect the final messaging. Please don't subject your users to this in production.
-![Renew Custom Fields Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-UglyExampleImage.png?raw=true)
+![Renew Custom Fields Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-UglyExampleImage.png?raw=true)
 
 ## How it works
 Renew is meant to be run on regular intervals throughout the day. It was designed to be used with a LaunchAgent which runs every 30 minutes, and an example LaunchAgent is provided.
