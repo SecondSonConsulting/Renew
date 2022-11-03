@@ -16,15 +16,6 @@ A configuration profile (either locally installed mobileconfig or delivered via 
 
 A means to initiate the script (typically a LaunchAgent)
 
-## Thank you!
-This project is made possible by the awesome folks on the MacAdmins slack for their support and community projects.
-
-It should be obvious to anyone familiar with [Nudge](https://github.com/macadmins/nudge) that this project is heavily influenced by it. Thank you Erik Gomez for providing your hard work to the community for free.
-
-A huge thanks to Bart Reardon for creating and maintaining [Swift Dialog](https://github.com/bartreardon/swiftDialog). Without this tool, Renew would not have been possible.
-
-A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @Brock Walters @Josh Rickets and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
-
 ## Screenshots
 ### Notification Mode Default User Experience
 ![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NotificationDefault.png?raw=true)
@@ -142,3 +133,12 @@ Tip: Remember you can use the SecretQuitKey to dismiss this without having to re
 This argument will force a SwiftDialog window with the "Normal Mode" options regardless of the current uptime or deferral options.
 ### --force-notification
 This argument will force a SwiftDialog Notification Center event regardless of the current uptime or deferral options.
+
+## Thank you!
+This project is made possible by the awesome folks on the MacAdmins slack for their support and community projects.
+
+It should be obvious to anyone familiar with [Nudge](https://github.com/macadmins/nudge) that this project is heavily influenced by it. Thank you Erik Gomez for providing your hard work to the community for free.
+
+A huge thanks to Bart Reardon for creating and maintaining [Swift Dialog](https://github.com/bartreardon/swiftDialog). Without this tool, Renew would not have been possible.
+
+A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @Brock Walters @Josh Rickets and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
