@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadDisplayName</key>
+			<string>renew</string>
+			<key>PayloadIdentifier</key>
+			<string>com.secondsonconsulting.renew.5A990D16-50BF-4F03-91DD-CD435C86DF1E</string>
+			<key>PayloadType</key>
+			<string>com.secondsonconsulting.renew</string>
+			<key>PayloadUUID</key>
+			<string>5A990D16-50BF-4F03-91DD-CD435C86DF1E</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>RequiredArguments</key>
+			<dict>
+				<key>MaximumDeferrals</key>
+				<integer>6</integer>
+				<key>UptimeThreshold</key>
+				<integer>10</integer>
+				<key>NotificationThreshold</key>
+				<integer>2</integer>
+				<key>DeferralDuration</key>
+				<integer>4</integer>
+			</dict>
+			<key>OptionalArguments</key>
+			<dict>
+				<key>Title</key>
+				<string>I am a custom title</string>
+				<key>AggroMessage</key>
+				<string>**I am a very aggressive message about your need to restart... grrr...**</string>
+				<key>NormalMessage</key>
+				<string>I am an ugly formatted but friendly message about your need to restart. I exist to illustrate how various options work, do not use me in production.</string>
+				<key>NotificationMessage</key>
+				<string>I am a message in your notification center about your need to restart.</string>
+				<key>NotificationIcon</key>
+				<string>/System/Applications/Automator.app</string>
+				<key>MessageIcon</key>
+				<string>/System/Applications/Automator.app</string>
+				<key>AdditionalDialogOptions</key>
+				<string>--titlefont color=purple --messagefont size=9</string>
+				<key>AdditionalAggressiveOptions</key>
+				<string>--ontop</string>
+				<key>SecretQuitKey</key>
+				<string>k</string>
+			</dict>
+		</dict>
+	</array>
+	<key>PayloadDisplayName</key>
+	<string>Renew Configuration</string>
+	<key>PayloadIdentifier</key>
+	<string>SecondSon.E37B3EC4-7BB2-4717-8627-02F002162FDB</string>
+	<key>PayloadScope</key>
+	<string>System</string>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>E37B3EC4-7BB2-4717-8627-02F002162FDB</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>
