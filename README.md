@@ -117,7 +117,9 @@ Typically Renew should be called just by itself, however some command line argum
 There are no valid combinations of command line options, only one option should be included at any time.
 **Renew should always be invoked as a currently logged in user, NOT as root.**
 ### --reset
-This argument will reset the user's deferral profile to all zeros
+This argument will reset the user's deferral profile to all zeros.
+### --version
+This argument will print the Renew and Dialog version and exit.
 ### --force-aggro
 This argument will force a SwiftDialog window with the "Aggressive Mode" options regardless of the current uptime or deferral options.
 Tip: Remember you can use the SecretQuitKey to dismiss this without having to restart during testing.
