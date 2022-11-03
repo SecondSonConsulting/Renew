@@ -16,8 +16,6 @@ scriptVersion="Beta 0.1.6"
 
 #Allow --force-aggro/normal/notification even if config file isn't present
 
-##SHOWSTOPPER FIXES NEEDED
-
 ##################################################################
 #
 # This section sets up the basic variables, functions, and validation
@@ -119,7 +117,7 @@ OPTIONS
 	--reset					This will reset the user's deferral profile to reset the Renew experience
 
 	--dry-run				Disables the restart/quit functionality of the "Restart" button for testing purposes.
-							Also ignores active deferral count and sets uptime to ensure an event is triggered.
+  				  			Also ignores active deferral count and sets uptime to ensure an event is triggered.
 
 	--force-aggro			Aggressive mode will be executed regardless of deferrals or uptime.
 
@@ -422,6 +420,7 @@ function exec_restart()
 debug_message "Executing restart!"
 
 #This is the restart command. Thank you Dan Snelson: https://snelson.us/2022/07/log-out-restart-shut-down/
+
 osascript -e 'tell app "loginwindow" to «event aevtrrst»'
 
 }

@@ -7,31 +7,27 @@ Renew runs as the logged in user and will never restart a computer without a use
 Regularly restarting your workstation is an important part of keeping it running healthy and secure. Application updates, MDM commands, and security software will run more efficiently when the computer is allowed to restart on a regular basis. We have found that 10-14 day restarts are ideal to keeping things working as expected.
 
 ## Dependencies
-macOS 11+ is required (Swift Dialog dependency)
-Swift Dialog v.2.0 or newer https://github.com/bartreardon/swiftDialog
+macOS 11+ is required
 Swift Dialog - (v.2.0 or newer required for notification center features) https://github.com/bartreardon/swiftDialog
 A configuration profile (either locally installed mobileconfig or delivered via MDM)
 A means to initiate the script (typically a LaunchAgent)
 
-## Thank you!
-This project is made possible by the awesome folks on the MacAdmins slack for their support and community projects.
+Swift Dialog - (v.2.0 or newer required for notification center features) https://github.com/bartreardon/swiftDialog
 
-It should be obvious to anyone familiar with [Nudge](https://github.com/macadmins/nudge) that this project is heavily influenced by it. Thank you Erik Gomez for providing your hard work to the community for free.
+A configuration profile (either locally installed mobileconfig or delivered via MDM)
 
-A huge thanks to Bart Reardon for creating and maintaining [Swift Dialog](https://github.com/bartreardon/swiftDialog). Without this tool, Renew would not have been possible.
-
-A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @Brock Walters @Josh Rickets and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
+A means to initiate the script (typically a LaunchAgent)
 
 ## Screenshots
 ### Notification Mode Default User Experience
-![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-NotificationDefault.png?raw=true)
+![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NotificationDefault.png?raw=true)
 ### Normal Mode Default User Experience
-![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-NormalDefaultDialog.png?raw=true)
+![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NormalDefaultDialog.png?raw=true)
 ### Aggressive Mode Default User Experience
-![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-AggressiveDefaultDialog.png?raw=true)
+![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-AggressiveDefaultDialog.png?raw=true)
 ### Custom Fields Ugly Example Image
 This image is only to illustrate how the various options you choose affect the final messaging. Please don't subject your users to this in production.
-![Renew Custom Fields Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Examples/Renew-UglyExampleImage.png?raw=true)
+![Renew Custom Fields Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-UglyExampleImage.png?raw=true)
 
 ## How it works
 Renew is meant to be run on regular intervals throughout the day. It was designed to be used with a LaunchAgent which runs every 30 minutes, and an example LaunchAgent is provided.
@@ -47,19 +43,18 @@ If the user ignores the deferral Swift Dialog windows beyond the threshold, Rene
 
 Renew will never initiate a restart of a workstation without the user clicking the button to consent to it. Actions are taken dependent upon Swift Dialog exit codes, and exit code 3 is used to initiate a reboot (aka the Information Button). All other exit codes either immediately exit Renew.
 
-## Installation Details
-Renew consists of a single shell script, typically installed to </usr/local/renew.sh>
+## Installation and Directories
+Renew consists of a single shell script, typically installed to ```/usr/local/renew.sh```
 An optional LaunchAgent is also provided, it will call the script every 30 minutes at :15 and :45 
 If you use our provided LaunchAgent, you  may want to also provide a Managed Background Items MDM payload to prevent the user from turing off the Login Item in macOS 13+. 
-The Label to enforce is:
-    com.secondsonconsulting.renew
+The Label to enforce is: ```com.secondsonconsulting.renew```
 A mobileconfig file is also required in order to dictate the user experience and script behavior.
 If you plan to use the "Notifications" options you may also wish to deliver a Notifications Profile via MDM to ensure the user gets the Notification Center events.
-Renew will generate its own configuration plist files located at:
-    ~/Library/Preferences/com.secondsonconsulting.renew.plist
+Renew will generate its own configuration plist files located at: ```~/Library/Preferences/com.secondsonconsulting.renew.plist```
 This plist can be deleted at any time to reset the user deferral counts without adversely impacting how Renew works.
 **Renew should always be invoked as a currently logged in user, NOT as root.**
 Installing the PKG file requires administrator access to set permissions on the script and to create the Global Launch Agent.
+Basic logging functionality is included. The Renew log can be found here: ```~/Library/Application Support/Renew```
 
 **A PKG installer that places the script and the LaunchAgent may also be provided, however at this time it will not be a signed package**
 
@@ -117,10 +112,12 @@ Path to the icon which will be used for Renew Swift Dialog windows. This can be 
 Default value: "SF=bolt.circle color1=pink color2=blue"
 #### AdditionalDialogOptions  \<string\>
 Any additional Swift Dialog options you wish to include can be provided here. This was tested primarily with --titlefont and --messagefont options, but other compatible Swift Dialog options will likely work. See [Swift Dialog](https://github.com/bartreardon/swiftDialog) documentation for options and formatting.
+
 Default value: ""
 #### SecretQuitKey  \<string\>
 By default, Swift Dialog can be quit using the CMD+Q option. This is undesirable for our purposes, and so a "secret quit key" is set by default and can be changed in the configuration file. 
 This must be a single character, and cannot be a capital letter or symbol requiring the shift key.
+
 **To quit a Renew message without being required to restart, use CMD+] or CMD + your Secret Quit Key.**
 
 Default value: "]"
@@ -130,7 +127,9 @@ Typically Renew should be called just by itself, however some command line argum
 There are no valid combinations of command line options, only one option should be included at any time.
 **Renew should always be invoked as a currently logged in user, NOT as root.**
 ### --reset
-This argument will reset the user's deferral profile to all zeros
+This argument will reset the user's deferral profile to all zeros.
+### --version
+This argument will print the Renew and Dialog version and exit.
 ### --force-aggro
 This argument will force a SwiftDialog window with the "Aggressive Mode" options regardless of the current uptime or deferral options.
 Tip: Remember you can use the SecretQuitKey to dismiss this without having to restart during testing.
@@ -138,3 +137,12 @@ Tip: Remember you can use the SecretQuitKey to dismiss this without having to re
 This argument will force a SwiftDialog window with the "Normal Mode" options regardless of the current uptime or deferral options.
 ### --force-notification
 This argument will force a SwiftDialog Notification Center event regardless of the current uptime or deferral options.
+
+## Thank you!
+This project is made possible by the awesome folks on the MacAdmins slack for their support and community projects.
+
+It should be obvious to anyone familiar with [Nudge](https://github.com/macadmins/nudge) that this project is heavily influenced by it. Thank you Erik Gomez for providing your hard work to the community for free.
+
+A huge thanks to Bart Reardon for creating and maintaining [Swift Dialog](https://github.com/bartreardon/swiftDialog). Without this tool, Renew would not have been possible.
+
+A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @Brock Walters @Josh Rickets and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
