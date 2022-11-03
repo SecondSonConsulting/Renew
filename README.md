@@ -110,10 +110,12 @@ Path to the icon which will be used for Renew Swift Dialog windows. This can be 
 Default value: "SF=bolt.circle color1=pink color2=blue"
 #### AdditionalDialogOptions  \<string\>
 Any additional Swift Dialog options you wish to include can be provided here. This was tested primarily with --titlefont and --messagefont options, but other compatible Swift Dialog options will likely work. See [Swift Dialog](https://github.com/bartreardon/swiftDialog) documentation for options and formatting.
+
 Default value: ""
 #### SecretQuitKey  \<string\>
 By default, Swift Dialog can be quit using the CMD+Q option. This is undesirable for our purposes, and so a "secret quit key" is set by default and can be changed in the configuration file. 
 This must be a single character, and cannot be a capital letter or symbol requiring the shift key.
+
 **To quit a Renew message without being required to restart, use CMD+] or CMD + your Secret Quit Key.**
 
 Default value: "]"
