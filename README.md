@@ -8,9 +8,12 @@ Regularly restarting your workstation is an important part of keeping it running
 
 ## Dependencies
 macOS 11+ is required (Swift Dialog dependency)
-Swift Dialog v.2.0 or newer https://github.com/bartreardon/swiftDialog
+
+
 Swift Dialog - (v.2.0 or newer required for notification center features) https://github.com/bartreardon/swiftDialog
+
 A configuration profile (either locally installed mobileconfig or delivered via MDM)
+
 A means to initiate the script (typically a LaunchAgent)
 
 ## Thank you!
