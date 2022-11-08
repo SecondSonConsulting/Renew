@@ -75,7 +75,7 @@ Example: If a device is powered on October 1st, and the UptimeThreshold is set t
 
 **Recommended Value:** 10
 #### NotificationThreshold \<integer\>
-The numbe of times the user will get a macOS Notification Center event prior to the full Swift Dialog experience.
+The number of times the user will get a macOS Notification Center event prior to the full Swift Dialog experience.
 Example: If a device is is past the uptime threshold and not within a deferral timeframe, they will be first notified via a notification center event. Renew processes this as a deferral, and exits after sending the notification.
 
 **Note:** This feature requires SwiftDialog 2.0 or greater. If you wish to run without the Notification Center feature, you can set this value to 0.
