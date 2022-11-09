@@ -33,9 +33,15 @@
 				<key>AggroMessage</key>
 				<string>**I am a very aggressive message about your need to restart... grrr...**</string>
 				<key>NormalMessage</key>
-				<string>I am an ugly formatted but friendly message about your need to restart. I exist to illustrate how various options work, do not use me in production.</string>
+				<string>I am an ugly formatted but friendly message about your need to restart. I exist to illustrate how various options work, do not use me in production. Remaining deferrals always print here -></string>
 				<key>NotificationMessage</key>
 				<string>I am a message in your notification center about your need to restart.</string>
+				<key>RestartButtonText</key>
+				<string>ok fiiiine i will restart now</string>
+				<key>DeferralButtonText</key>
+				<string>not now, stop bugging me!</string>
+				<key>NoDeferralsRemainingButtonText</key>
+				<string>alas, i can no longer delay the inevitable...</string>
 				<key>NotificationIcon</key>
 				<string>/System/Applications/Automator.app</string>
 				<key>MessageIcon</key>

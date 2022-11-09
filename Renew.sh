@@ -101,6 +101,7 @@ SYNOPSIS
 DESCRIPTION
 	The Renew script is designed to be run on regular intervals (about every 30 minutes, typically via a Global Launch Agent).
 	In normal usage, no additional arguments are required. The Options below are primarily for testing.
+	
 	Multiple options are not supported, only one option can be chosen at a time.
 
 OPTIONS
@@ -227,21 +228,47 @@ deferralsRemaining=$((maximumDeferrals-currentDeferralCount))
 
 #Setting variables based on mobileconfig profile - OptionalArguments
 #If no argument is given in the config file, set the script default
-
-#Define script default messaging/icons
-defaultDialogIcon="SF=bolt.circle color1=pink color2=blue"
-defaultNotificationIcon=""
-defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
-defaultDialogDeferralMessage="Deferrals remaining until required restart: "
-defaultDialogAggroMessage="**Please save your work and restart**"
-defaultDialogNotificationMessage="In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
-defaultDialogTitle="Please Restart"
 defaultDialogAdditionalOptions=""
 defaultDialogAggressiveOptions=""
 defaultSecretQuitKey="]"
+defaultDialogIcon="SF=bolt.circle color1=pink color2=blue"
+defaultNotificationIcon=""
+
+#Language Support starts here. There is probably a cleaner way to get this.
+#Get an array containing all selected languages
+languagesArray=( $(defaults read .GlobalPreferences AppleLanguages ) )
+
+#Array entry 1 is a parenthesis and entry 2 is the language. Grab just the first two characters of the 2nd entry in the array
+languageChoice=${languagesArray[2]:1:2}
+
+#To add additional language support, create a case statement for the 2 letter language prefix
+#For example: "en" for english or "es" for espaniol
+#Then enter the desired text for those strings.
+
+case "$languageChoice" in
+    en)
+        #Define script default messaging ENGLISH
+		defaultDialogTitle="Please Restart"
+		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible.\n\nDeferrals remaining until required restart:  "
+		defaultDialogAggroMessage="**Please save your work and restart**"
+		defaultDialogNotificationMessage="In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
+		defaultRestartButtonText="OK, Restart Now I am Ready"
+		defaultDeferralButtonText="Not now, remind me later..."
+		defaultNoDeferralsRemainingButtonText="No deferrals remaining"
+    ;;
+    *)
+		#Define script default messaging ENGLISH
+		defaultDialogTitle="Please Restart"
+		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
+		defaultDialogAggroMessage="**Please save your work and restart**"
+		defaultDialogNotificationMessage="In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
+
+    ;;
+esac
 
 #Now do the logic to set the variables that will actually be used
 #This is tedious code that could be simplified with a function, but i couldn't get my brain around it
+#How do you set a variable to have the name of a argument you pass to a function? Need someone smarter than me.
 
 if "$pBuddy" -c "Print :OptionalArguments:MessageIcon" "$renewConfig" >/dev/null 2>&1 ; then
 	dialogIcon=$("$pBuddy" -c "Print :OptionalArguments:MessageIcon" "$renewConfig")
@@ -287,6 +314,25 @@ else
 	dialogTitle="$defaultDialogTitle"
 fi
 
+###BUTTONS####
+if "$pBuddy" -c "Print :OptionalArguments:RestartButtonText" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogRestartButtonText=$("$pBuddy" -c "Print :OptionalArguments:RestartButtonText" "$renewConfig")
+else
+	dialogRestartButtonText="$defaultRestartButtonText"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:DeferralButtonText" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogDeferralButtonText=$("$pBuddy" -c "Print :OptionalArguments:DeferralButtonText" "$renewConfig")
+else
+	dialogDeferralButtonText="$defaultDeferralButtonText"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:NoDeferralsRemainingButtonText" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogNoDeferralsRemainingButtonText=$("$pBuddy" -c "Print :OptionalArguments:NoDeferralsRemainingButtonText" "$renewConfig")
+else
+	dialogNoDeferralsRemainingButtonText="$defaultNoDeferralsRemainingButtonText"
+fi
+
 if "$pBuddy" -c "Print :OptionalArguments:AdditionalDialogOptions" "$renewConfig" >/dev/null 2>&1 ; then
 	dialogAdditionalOptions=$("$pBuddy" -c "Print :OptionalArguments:AdditionalDialogOptions" "$renewConfig")
 else
@@ -315,9 +361,9 @@ debug_message "Executing aggressive mode"
 
 	"$dialogPath" -o \
 	--title "$dialogTitle" \
-	--button1text "No deferrals remaining" \
+	--button1text "$dialogNoDeferralsRemainingButtonText" \
 	--button1disabled \
-	--infobuttontext "OK, Restart Now I am Ready" \
+	--infobuttontext "$dialogRestartButtonText" \
 	--icon "$dialogIcon" \
 	--messagealignment centre \
 	--centericon \
@@ -344,14 +390,14 @@ debug_message "Executing normal mode"
 	
 	"$dialogPath" -o \
 	--title "$dialogTitle" \
-	--infobuttontext "OK, Restart Now I am Ready" \
-	--button1text "Not now, remind me later..." \
+	--infobuttontext "$dialogRestartButtonText" \
+	--button1text "$dialogDeferralButtonText" \
 	--centericon \
 	--icon "$dialogIcon" \
 	--messagealignment centre \
 	--quitkey "$secretQuitKey" \
 	$(echo $dialogAdditionalOptions) \
-	--message "$dialogNormalMessage\n\n$defaultDialogDeferralMessage $deferralsRemaining" \
+	--message "$dialogNormalMessage $deferralsRemaining" \
 
 	#Set exit code based on user input
 	dialogExitCode=$?
