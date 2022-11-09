@@ -2,19 +2,9 @@
 #set -x
 
 ##Renew.sh
-scriptVersion="Beta 0.1.7"
+scriptVersion="Beta 0.1.8"
 
 #Written by Trevor Sysock (aka @bigmacadmin) at Second Son Consulting Inc.
-
-###FEATURE ENHANCEMENTS WANTED:
-#Set config file variable for how many days when aggro mode becomes the default (i.e. 30 days uptime, no deferrals offered.)
-
-#Application/Camera assertions to prevent popups while sharing screen or using camera.
-
-#Multi-language support
-##Need to fix line "Remaining deferrals until forced restart: "
-
-#Allow --force-aggro/normal/notification even if config file isn't present
 
 ##################################################################
 #
@@ -242,6 +232,7 @@ deferralsRemaining=$((maximumDeferrals-currentDeferralCount))
 defaultDialogIcon="SF=bolt.circle color1=pink color2=blue"
 defaultNotificationIcon=""
 defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
+defaultDialogDeferralMessage="Deferrals remaining until required restart: "
 defaultDialogAggroMessage="**Please save your work and restart**"
 defaultDialogNotificationMessage="In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
 defaultDialogTitle="Please Restart"
@@ -360,7 +351,7 @@ debug_message "Executing normal mode"
 	--messagealignment centre \
 	--quitkey "$secretQuitKey" \
 	$(echo $dialogAdditionalOptions) \
-	--message "$dialogNormalMessage\n\nIf you can't restart now, you can defer $deferralsRemaining more times." \
+	--message "$dialogNormalMessage\n\n$defaultDialogDeferralMessage $deferralsRemaining" \
 
 	#Set exit code based on user input
 	dialogExitCode=$?
