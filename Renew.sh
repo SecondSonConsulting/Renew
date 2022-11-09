@@ -31,7 +31,7 @@ if [ ! -d "$logDir" ]; then
 fi
 
 #Test if we can write to the log file
-echo "$(date): Renew script initiated" >> "$logFile" || { echo "ERROR: Cannot write to log file. Exiting" ; exit 1 ; }
+echo "$(date): Renew script initiated" >> "$logFile" || { echo "ERROR: Cannot write to log file. Exiting" ; exit 2 ; }
 	
 #Used only for debugging. Gives feedback into standard out if dryRun=1, also to $logFile if you set it
 function debug_message()
@@ -76,7 +76,7 @@ fi
 #Exit if swiftDialog dependency isn't installed
 if [ ! -e "$dialogPath" ]; then
 	debug_message "ERROR: Missing dependency: SwiftDialog"
-	exit 1
+	exit 3
 fi
 
 #This function confirms read/write permissions to the user deferral profile
@@ -85,7 +85,7 @@ if "$pBuddy" -c "Add :TestPerms integer 0" "$userDeferralProfile" >/dev/null 2>&
 else
 	debug_message "ERROR: Failed to properly write to $userDeferralProfile - Exiting."
 	echo "ERROR: Failed to properly right to $userDeferralProfile - Exiting."
-	exit 1
+	exit 2
 fi
 
 #This is the help dialog explaining the options and how to use
@@ -120,6 +120,13 @@ OPTIONS
 	
 	--help					Print this help message and exit.
 
+EXIT CODES
+	0						Successful exit
+	1						Unknown or undefined error
+	2						Permissions or home folder issue
+	3						SwiftDialog binary missing
+	4						Invalid arguments given at command line
+
 HELPMESSAGE
 
 }
@@ -148,7 +155,7 @@ defaults delete "$userDeferralProfile" >/dev/null 2>&1
 
 if [ -n "$2" ]; then
 	debug_message "ERROR: Invalid arguments: $@"
-	exit 1
+	exit 4
 elif [ "$1" = "--dry-run" ]; then
 	debug_message "--dry-run used. Device will not restart during this run."
 	dryRun=1
@@ -174,7 +181,7 @@ elif [ "$1" = "" ]; then
 else
 	debug_message "ERROR: Invalid arguments given. Printing help message and exiting."
 	help_message
-	exit 1
+	exit 4
 fi
 
 #Ensure the user deferral file exists with valid entries
@@ -501,7 +508,7 @@ humanReadableDeferDate=$(date -j -f %s $deferUntil)
 
 #To reset deferrals, execute sript with /Renew.sh --reset
 if [ "$1" = "--reset" ]; then
-		reset_deferral_profile && debug_message "Resetting deferrals." || { debug_message "ERROR: Could not reset deferral profile. Probably a permissions issue." ; exit 1 ; }
+		reset_deferral_profile && debug_message "Resetting deferrals." || { debug_message "ERROR: Could not reset deferral profile. Probably a permissions issue." ; exit 2 ; }
 	exit 0
 fi
 
