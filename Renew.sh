@@ -256,6 +256,9 @@ languagesArray=( $(defaults read .GlobalPreferences AppleLanguages ) )
 #Array entry 1 is a parenthesis and entry 2 is the language. Grab just the first two characters of the 2nd entry in the array
 languageChoice=${languagesArray[2]:1:2}
 
+#languageChoice="en"
+#languageChoice="fr"
+
 debug_message "Language identified: $languageChoice"
 
 #To add additional language support, create a case statement for the 2 letter language prefix
@@ -273,6 +276,16 @@ case "$languageChoice" in
 		defaultDeferralButtonText="Not now, remind me later..."
 		defaultNoDeferralsRemainingButtonText="No deferrals remaining"
     ;;
+	   fr)
+       #Define script default messaging FRENCH
+       defaultDialogTitle="Veuillez redemarrer"
+       defaultDialogNormalMessage="Afin de garder votre système sain et sécurisé, il doit être redémarré.  \n**Veuillez enregistrer votre travail** et redemarrer dès que possible.\n\nReports restants jusqu'au redémarrage requis:  "
+       defaultDialogAggroMessage="**Veuillez enregistrer votre travail et redémarrer**"
+       defaultDialogNotificationMessage="Afin de garder votre système sain et sécurisé, il doit être redémarré.  \nVeuillez enregistrer votre travail et redémarrer dès que possible."
+       defaultRestartButtonText="OK, Redémarrez maintenant je suis prêt"
+       defaultDeferralButtonText="Pas maintenant, rappelle-moi plus tard..."
+       defaultNoDeferralsRemainingButtonText="Aucun report restant"
+   ;;
     *)
 		#Define script default messaging ENGLISH
 		defaultDialogTitle="Please Restart"
