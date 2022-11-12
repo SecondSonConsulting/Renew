@@ -278,6 +278,7 @@ case "$languageChoice" in
     ;;
 	   fr)
        #Define script default messaging FRENCH
+       #Credit and thanks to Martin Cech (@martinc on MacAdmins Slack)
        defaultDialogTitle="Veuillez redemarrer"
        defaultDialogNormalMessage="Afin de garder votre système sain et sécurisé, il doit être redémarré.  \n**Veuillez enregistrer votre travail** et redemarrer dès que possible.\n\nReports restants jusqu'au redémarrage requis:  "
        defaultDialogAggroMessage="**Veuillez enregistrer votre travail et redémarrer**"
