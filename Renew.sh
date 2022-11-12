@@ -258,8 +258,17 @@ languageChoice=${languagesArray[2]:1:2}
 
 #languageChoice="en"
 #languageChoice="fr"
+#languageChoice="es"
+#languageChoice="de"
+#languageChoice="it"
 
 debug_message "Language identified: $languageChoice"
+
+#############################################################################################
+#
+#	Language Support
+#
+#############################################################################################
 
 #To add additional language support, create a case statement for the 2 letter language prefix
 #For example: "en" for english or "es" for espaniol
@@ -276,7 +285,7 @@ case "$languageChoice" in
 		defaultDeferralButtonText="Not now, remind me later..."
 		defaultNoDeferralsRemainingButtonText="No deferrals remaining"
     ;;
-	   fr)
+	fr)
        #Define script default messaging FRENCH
        #Credit and thanks to Martin Cech (@martinc on MacAdmins Slack)
        defaultDialogTitle="Veuillez redemarrer"
@@ -286,6 +295,36 @@ case "$languageChoice" in
        defaultRestartButtonText="OK, Redémarrez maintenant je suis prêt"
        defaultDeferralButtonText="Pas maintenant, rappelle-moi plus tard..."
        defaultNoDeferralsRemainingButtonText="Aucun report restant"
+   ;;
+   es)
+       #Define script default messaging ESPANIOL
+       defaultDialogTitle="Por favor reinicie"
+       defaultDialogNormalMessage="Para mantener su sistema seguro y funcionando, necesitamos que reinicie.  \n**Por favor guarda tus archivos ** y reinicia lo antes posible.\n\nDeferrals remaining until required restart:  "
+       defaultDialogAggroMessage="**Guarde su trabajo y reinicie por favor **"
+       defaultDialogNotificationMessage="Para mantener su sistema seguro y funcionando, necesitamos que reinicie.  \nPor favor guarda tus archivos ."
+       defaultRestartButtonText="OK vale, reinicie ahora, estoy listo"
+       defaultDeferralButtonText="Ahora no, recuérdamelo mas tarde"
+       defaultNoDeferralsRemainingButtonText="No deferrals remaining"
+   ;;
+   it)
+       #Define script default messaging ITALIANO
+       defaultDialogTitle="Per favore riavvia"
+       defaultDialogNormalMessage="Per mantenere il tuo sistema sicuro & performante, necessitiamo un riavvio.  \n**Per favore salva i tuoi lavori** e riavvia il prima possibile.\n\nDeferrals remaining until required restart:  "
+       defaultDialogAggroMessage="**Salva i tuoi lavori e gentilmente riavvia**"
+       defaultDialogNotificationMessage="Per mantenere il tuo sistema sicuro & performante, necessitiamo un riavvio.  \nPer favore salva i tuoi lavori e riavvia il prima possibile."
+       defaultRestartButtonText="OK, Riavvia ora, sono pronto"
+       defaultDeferralButtonText="Not ora ricordamelo più’ tardi"
+       defaultNoDeferralsRemainingButtonText="No deferrals remaining"
+   ;;
+   de)
+		#Define script default messaging DEUTSCH
+       defaultDialogTitle="Bitte führen Sie einen Neustart durch"
+       defaultDialogNormalMessage="Um die Stabilität und Sicherheit Ihres Systems zu gewährleisten, ist ein Neustart erforderlich \n**Bitte speichern Sie Ihre Arbeit** und starten Sie Ihren Computer neu sobald als möglich \n\nDeferrals remaining until required restart:  "
+       defaultDialogAggroMessage="**Bitte speichern Sie Ihre Arbeit und starten neu**"
+       defaultDialogNotificationMessage="Um die Stabilität und Sicherheit Ihres Systems zu gewährleisten, ist ein Neustart erforderlich \nBitte speichern Sie Ihre Arbeit und starten Sie Ihren Computer neu sobald als möglich "
+       defaultRestartButtonText="OK,, ich bin fertig, bitte starten Sie neu"
+       defaultDeferralButtonText="Nicht jetzt, bitte erinnern Sie mich später"
+       defaultNoDeferralsRemainingButtonText="Keine weitere Aufschiebung möglich"
    ;;
     *)
 		#Define script default messaging ENGLISH
