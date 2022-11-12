@@ -417,6 +417,7 @@ function exec_aggro_mode()
 log_message "Executing aggressive mode"
 
 #go aggro
+	check_assertions
 
 	"$dialogPath" -o \
 	--title "$dialogTitle" \
@@ -446,7 +447,8 @@ log_message "Executing normal mode"
 
 
 #go normal
-	
+	check_assertions
+
 	"$dialogPath" -o \
 	--title "$dialogTitle" \
 	--infobuttontext "$dialogRestartButtonText" \
@@ -470,6 +472,7 @@ function exec_notification_mode()
 log_message "Executing notification mode"
 
 #go notification
+	check_assertions
 
 	"$dialogPath" \
 	--notification \
@@ -522,6 +525,48 @@ osascript -e 'tell app "loginwindow" to «event aevtrrst»'
 }
 
 fi
+
+#By default, we wnat to ignore some specific app assertions (caffeinate, Amphetamine, obs). These aren't actual indicators of what we're looking for.
+assertionsToIgnore=()
+assertionsToIgnore+="obs"
+assertionsToIgnore+="Amphetamine"
+assertionsToIgnore+="caffeinate"
+
+function check_assertions()
+{
+##Thank you @Pico for the commands to check for the screen being awake and unlocked
+#Check if the screen is asleep. Exit quietly without a deferral if it s not awake.
+if [[ "$(osascript -l 'JavaScript' -e 'ObjC.import("CoreGraphics"); $.CGDisplayIsActive($.CGMainDisplayID())')" == '1' ]]; then
+    debug_message "Screen is awake"
+else
+    log_message "Screen is asleep. Exiting without event or deferral."
+    exit 0
+fi
+
+#Check if the screen is locked. Exit quietly without a deferral if it s not unlocked.
+if [[ "$(/usr/libexec/PlistBuddy -c 'Print :IOConsoleUsers:0:CGSSessionScreenIsLocked' /dev/stdin <<< "$(ioreg -ac IORegistryEntry -k IOConsoleUsers -d 1)" 2> /dev/null)" != 'true' ]]; then
+    debug_message "Screen is unlocked"
+else
+    log_message "Screen is locked. Exiting without event or deferral."
+    exit 0
+fi
+
+#Check for active screen assertions. If an application is preventing the screen from sleeping, we don't notify. It typically means user is in a video meeting or watching a video.
+checkForAssertion=$(pmset -g | grep "display sleep prevented by"| sed 's/.*(\(.*\))/\1/' | sed 's/display sleep prevented by //'| sed 's/,//g')
+
+for i in "${assertionsToIgnore[@]}"; do
+	checkForAssertion=$(echo "$checkForAssertion" | sed "s/$i//" | xargs )
+done
+	
+if [ -n "$checkForAssertion" ]; then
+    log_message "Display sleep assertion(s) identified: $checkForAssertion ... Exiting."
+    exit 0
+else
+	debug_message "No assertions stopping us from notifying."
+fi
+
+
+}
 
 ##################################################################
 #
