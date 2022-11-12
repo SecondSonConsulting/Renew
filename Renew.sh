@@ -134,6 +134,7 @@ EXIT CODES
 	2						Permissions or home folder issue
 	3						SwiftDialog binary missing
 	4						Invalid arguments given at command line
+	*						Other undefined exit codes are most likely passed from SwiftDialog exiting improperly
 
 HELPMESSAGE
 
@@ -257,10 +258,6 @@ languagesArray=( $(defaults read .GlobalPreferences AppleLanguages ) )
 languageChoice=${languagesArray[2]:1:2}
 
 #languageChoice="en"
-#languageChoice="fr"
-#languageChoice="es"
-#languageChoice="de"
-#languageChoice="it"
 
 debug_message "Language identified: $languageChoice"
 
@@ -275,16 +272,6 @@ debug_message "Language identified: $languageChoice"
 #Then enter the desired text for those strings.
 
 case "$languageChoice" in
-    en)
-        #Define script default messaging ENGLISH
-		defaultDialogTitle="Please Restart"
-		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible.\n\nDeferrals remaining until required restart:  "
-		defaultDialogAggroMessage="**Please save your work and restart**"
-		defaultDialogNotificationMessage="In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
-		defaultRestartButtonText="OK, Restart Now I am Ready"
-		defaultDeferralButtonText="Not now, remind me later..."
-		defaultNoDeferralsRemainingButtonText="No deferrals remaining"
-    ;;
 	fr)
        #Define script default messaging FRENCH
        #Credit and thanks to Martin Cech (@martinc on MacAdmins Slack)
@@ -327,12 +314,15 @@ case "$languageChoice" in
        defaultNoDeferralsRemainingButtonText="Keine weitere Aufschiebung möglich"
    ;;
     *)
+        ##English is the default and fallback language
 		#Define script default messaging ENGLISH
 		defaultDialogTitle="Please Restart"
-		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
+		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible.\n\nDeferrals remaining until required restart:  "
 		defaultDialogAggroMessage="**Please save your work and restart**"
 		defaultDialogNotificationMessage="In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
-
+		defaultRestartButtonText="OK, Restart Now I am Ready"
+		defaultDeferralButtonText="Not now, remind me later..."
+		defaultNoDeferralsRemainingButtonText="No deferrals remaining"
     ;;
 esac
 
@@ -639,7 +629,6 @@ if [ "$uptime_days" -ge "$uptimeThreshold" ]; then
 	#User has made a selection. Now we process it.
 	debug_message "DIALOG EXIT CODE: $dialgoExitCode."
 
-	
 	if [[ "$dialogExitCode" = 0 ]]; then
 		log_message "USER ACTION: User chose deferral."
 		exec_deferral
