@@ -4,7 +4,7 @@
 ##Renew.sh
 scriptVersion="Beta 0.1.8"
 
-#Written by Trevor Sysock (aka @bigmacadmin) at Second Son Consulting Inc.
+#Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 
 ##################################################################
 #
@@ -25,16 +25,18 @@ userHomeFolder=$(dscl . -read /users/${currentUser} NFSHomeDirectory | cut -d " 
 logDir="$userHomeFolder/Library/Application Support/Renew"
 logFile="$logDir"/Renew.log
 
-#Check if the log folder exists, if not then make it. 
-if [ ! -d "$logDir" ]; then
-	mkdir -p "$logDir"
-fi
-
-#Test if we can write to the log file
-echo "$(date): Renew script initiated" >> "$logFile" || { echo "ERROR: Cannot write to log file. Exiting" ; exit 1 ; }
-	
 #Used only for debugging. Gives feedback into standard out if dryRun=1, also to $logFile if you set it
 function debug_message()
+{
+
+if [ "$dryRun" = 1 ]; then
+	/bin/echo "DEBUG: $*"
+fi
+
+}
+
+#Publish a message to the log (and also to the debug channel)
+function log_message()
 {
 
 if [ -e "$logFile" ]; then
@@ -42,10 +44,27 @@ if [ -e "$logFile" ]; then
 fi
 
 if [ "$dryRun" = 1 ]; then
-	/bin/echo "DEBUG: $*"
+	debug_message "$*"
 fi
 
 }
+
+#Check if the log folder exists, if not then make it. 
+if [ ! -d "$logDir" ]; then
+	mkdir -p "$logDir"
+fi
+
+#Create the log file if its missing
+touch "$logFile"
+
+#If the log file is over 3k lines, make a new log file. We keep one old version and write over the top of it when rotating
+logLength=$(wc -l < "$logFile" | xargs)
+if [ "$logLength" -ge 3000 ]; then
+	debug_message "Rotating Logs"
+	mv "$logFile" "${logDir}/old_Renew.log"
+	touch "$logFile"
+	log_message "Logfile Rotated"
+fi
 
 #Path to mobileconfig payload
 renewConfig="/Library/Managed Preferences/com.secondsonconsulting.renew.plist"
@@ -61,7 +80,7 @@ userDeferralProfile="$userHomeFolder/Library/Preferences/com.secondsonconsulting
 
 #This is up top so that it runs even if no validation succeeds.
 if [ "$1" = "--version" ]; then
-	debug_message "--version argument passed. Printing version information and exiting."
+	log_message "--version argument passed. Printing version information and exiting."
 	echo "Renew.sh version: $scriptVersion"
 	echo "SwiftDialog Version: $($dialogPath --version)"
 	exit 0
@@ -69,23 +88,23 @@ fi
 
 #Exit if there is no mobileconfig payload
 if [ ! -f "$renewConfig" ]; then
-	debug_message "Configuration profile missing. Exiting."
+	log_message "Configuration profile missing. Exiting."
 	exit 0
 fi
 
 #Exit if swiftDialog dependency isn't installed
 if [ ! -e "$dialogPath" ]; then
-	debug_message "ERROR: Missing dependency: SwiftDialog"
-	exit 1
+	log_message "ERROR: Missing dependency: SwiftDialog"
+	exit 3
 fi
 
 #This function confirms read/write permissions to the user deferral profile
 if "$pBuddy" -c "Add :TestPerms integer 0" "$userDeferralProfile" >/dev/null 2>&1; then
 	"$pBuddy" -c "Delete :TestPerms" "$userDeferralProfile" >/dev/null 2>&1
 else
-	debug_message "ERROR: Failed to properly write to $userDeferralProfile - Exiting."
+	log_message "ERROR: Failed to properly write to $userDeferralProfile - Exiting."
 	echo "ERROR: Failed to properly right to $userDeferralProfile - Exiting."
-	exit 1
+	exit 2
 fi
 
 #This is the help dialog explaining the options and how to use
@@ -120,6 +139,14 @@ OPTIONS
 	
 	--help					Print this help message and exit.
 
+EXIT CODES
+	0						Successful exit
+	1						Unknown or undefined error
+	2						Permissions or home folder issue
+	3						SwiftDialog binary missing
+	4						Invalid arguments given at command line
+	*						Other undefined exit codes are most likely passed from SwiftDialog exiting improperly
+
 HELPMESSAGE
 
 }
@@ -147,22 +174,22 @@ defaults delete "$userDeferralProfile" >/dev/null 2>&1
 ##Check for testing parameters. This section could be redone using getopts, but the purpose of this script is not to be used with arguments. Arguments are just for testing, and are limited to 1 argument each run.
 
 if [ -n "$2" ]; then
-	debug_message "ERROR: Invalid arguments: $@"
-	exit 1
+	log_message "ERROR: Invalid arguments: $@"
+	exit 4
 elif [ "$1" = "--dry-run" ]; then
-	debug_message "--dry-run used. Device will not restart during this run."
+	log_message "--dry-run used. Device will not restart during this run."
 	dryRun=1
 elif  [ "$1" = "--force-aggro" ]; then
-	debug_message "--force-aggro used. Aggressive mode will be executed regardless of deferrals or uptime."
+	log_message "--force-aggro used. Aggressive mode will be executed regardless of deferrals or uptime."
 	forceAggro=1
 elif [ "$1" = "--force-normal" ]; then
-	debug_message "--force-normal used. Normal mode will be executed regardless of deferrals or uptime."
+	log_message "--force-normal used. Normal mode will be executed regardless of deferrals or uptime."
 	forceNormal=1
 elif [ "$1" = "--force-notification" ]; then
-	debug_message "--force-notification used. Notification mode will be executed regardless of deferrals or uptime."
+	log_message "--force-notification used. Notification mode will be executed regardless of deferrals or uptime."
 	forceNotification=1
 elif [ "$1" = "--reset" ]; then
-	debug_message "--reset used. Resetting deferral profile and exiting."
+	log_message "--reset used. Resetting deferral profile and exiting."
 	reset_deferral_profile
 	exit 0
 elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
@@ -174,7 +201,7 @@ elif [ "$1" = "" ]; then
 else
 	debug_message "ERROR: Invalid arguments given. Printing help message and exiting."
 	help_message
-	exit 1
+	exit 4
 fi
 
 #Ensure the user deferral file exists with valid entries
@@ -185,7 +212,7 @@ debug_message "Validating user deferral profile plist"
 "$pBuddy" -c "Print :ActiveDeferral" "$userDeferralProfile" >/dev/null 2>&1 || validationFail=1
 
 if [ "$validationFail" = 1 ]; then
-	debug_message "WARNING: User deferral profile plist FAILED validation. Resetting."
+	log_message "WARNING: User deferral profile plist FAILED validation. Resetting."
 	reset_deferral_profile
 else
 	debug_message "User deferral profile plist validated successfully"
@@ -198,7 +225,7 @@ function validate_required_argument()
 
 "$pBuddy" -c "Print $1" "$renewConfig" >/dev/null 2>&1  \
 	&& debug_message "Required Argument found: $1" \
-	|| { debug_message "ERROR: Required Argument missing: $1" ; exit 2 ; }
+	|| { log_message "ERROR: Required Argument missing: $1" ; exit 2 ; }
 
 }
 
@@ -231,7 +258,6 @@ deferralsRemaining=$((maximumDeferrals-currentDeferralCount))
 defaultDialogAdditionalOptions=""
 defaultDialogAggressiveOptions=""
 defaultSecretQuitKey="]"
-defaultDialogIcon="SF=bolt.circle color1=pink color2=blue"
 defaultNotificationIcon=""
 
 #Language Support starts here. There is probably a cleaner way to get this.
@@ -241,13 +267,65 @@ languagesArray=( $(defaults read .GlobalPreferences AppleLanguages ) )
 #Array entry 1 is a parenthesis and entry 2 is the language. Grab just the first two characters of the 2nd entry in the array
 languageChoice=${languagesArray[2]:1:2}
 
+#languageChoice="en"
+
+debug_message "Language identified: $languageChoice"
+
+#############################################################################################
+#
+#	Language Support
+#
+#############################################################################################
+
 #To add additional language support, create a case statement for the 2 letter language prefix
 #For example: "en" for english or "es" for espaniol
 #Then enter the desired text for those strings.
 
 case "$languageChoice" in
-    en)
-        #Define script default messaging ENGLISH
+	fr)
+       #Define script default messaging FRENCH
+       #Credit and thanks to Martin Cech (@martinc on MacAdmins Slack)
+       defaultDialogTitle="Veuillez redemarrer"
+       defaultDialogNormalMessage="Afin de garder votre système sain et sécurisé, il doit être redémarré.  \n**Veuillez enregistrer votre travail** et redemarrer dès que possible.\n\nReports restants jusqu'au redémarrage requis:  "
+       defaultDialogAggroMessage="**Veuillez enregistrer votre travail et redémarrer**"
+       defaultDialogNotificationMessage="Afin de garder votre système sain et sécurisé, il doit être redémarré.  \nVeuillez enregistrer votre travail et redémarrer dès que possible."
+       defaultRestartButtonText="OK, Redémarrez maintenant je suis prêt"
+       defaultDeferralButtonText="Pas maintenant, rappelle-moi plus tard..."
+       defaultNoDeferralsRemainingButtonText="Aucun report restant"
+   ;;
+   es)
+       #Define script default messaging ESPANIOL
+       defaultDialogTitle="Por favor reinicie"
+       defaultDialogNormalMessage="Para mantener su sistema seguro y funcionando, necesitamos que reinicie.  \n**Por favor guarda tus archivos ** y reinicia lo antes posible.\n\nDeferrals remaining until required restart:  "
+       defaultDialogAggroMessage="**Guarde su trabajo y reinicie por favor **"
+       defaultDialogNotificationMessage="Para mantener su sistema seguro y funcionando, necesitamos que reinicie.  \nPor favor guarda tus archivos ."
+       defaultRestartButtonText="OK vale, reinicie ahora, estoy listo"
+       defaultDeferralButtonText="Ahora no, recuérdamelo mas tarde"
+       defaultNoDeferralsRemainingButtonText="No deferrals remaining"
+   ;;
+   it)
+       #Define script default messaging ITALIANO
+       defaultDialogTitle="Per favore riavvia"
+       defaultDialogNormalMessage="Per mantenere il tuo sistema sicuro & performante, necessitiamo un riavvio.  \n**Per favore salva i tuoi lavori** e riavvia il prima possibile.\n\nDeferrals remaining until required restart:  "
+       defaultDialogAggroMessage="**Salva i tuoi lavori e gentilmente riavvia**"
+       defaultDialogNotificationMessage="Per mantenere il tuo sistema sicuro & performante, necessitiamo un riavvio.  \nPer favore salva i tuoi lavori e riavvia il prima possibile."
+       defaultRestartButtonText="OK, Riavvia ora, sono pronto"
+       defaultDeferralButtonText="Not ora ricordamelo più’ tardi"
+       defaultNoDeferralsRemainingButtonText="No deferrals remaining"
+   ;;
+   de)
+		#Define script default messaging DEUTSCH
+       defaultDialogTitle="Bitte führen Sie einen Neustart durch"
+       defaultDialogNormalMessage="Um die Stabilität und Sicherheit Ihres Systems zu gewährleisten, ist ein Neustart erforderlich \n**Bitte speichern Sie Ihre Arbeit** und starten Sie Ihren Computer neu sobald als möglich \n\nDeferrals remaining until required restart:  "
+       defaultDialogAggroMessage="**Bitte speichern Sie Ihre Arbeit und starten neu**"
+       defaultDialogNotificationMessage="Um die Stabilität und Sicherheit Ihres Systems zu gewährleisten, ist ein Neustart erforderlich \nBitte speichern Sie Ihre Arbeit und starten Sie Ihren Computer neu sobald als möglich "
+       defaultRestartButtonText="OK,, ich bin fertig, bitte starten Sie neu"
+       defaultDeferralButtonText="Nicht jetzt, bitte erinnern Sie mich später"
+       defaultNoDeferralsRemainingButtonText="Keine weitere Aufschiebung möglich"
+   ;;
+    *)
+        ##English is the default and fallback language
+		#Define script default messaging ENGLISH
 		defaultDialogTitle="Please Restart"
 		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible.\n\nDeferrals remaining until required restart:  "
 		defaultDialogAggroMessage="**Please save your work and restart**"
@@ -256,39 +334,75 @@ case "$languageChoice" in
 		defaultDeferralButtonText="Not now, remind me later..."
 		defaultNoDeferralsRemainingButtonText="No deferrals remaining"
     ;;
-    *)
-		#Define script default messaging ENGLISH
-		defaultDialogTitle="Please Restart"
-		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
-		defaultDialogAggroMessage="**Please save your work and restart**"
-		defaultDialogNotificationMessage="In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
-
-    ;;
 esac
+
+##Icon setup and Dark Mode Detection
+#Test whether DarkMode is enabled, and set darkMode variable accordingly
+$(defaults read -g AppleInterfaceStyle  > /dev/null 2>&1 | grep -q "Dark" ) && darkMode="enabled" || darkMode="disabled"
+
+##Make sure $dialogIcon is an empty value, then the logic is:
+#if an icon is defined, but no dark mode is defined, use it whether dark mode is enabled or not
+#if an icon is defined AND a dark mode icon is defined, then use the appropriate one
+#If no icon is defined, set to the script default value
+dialogIcon=''
+
+#If a MessageIcon is defined in the configuration profile, set our variable to use it.
+if "$pBuddy" -c "Print :OptionalArguments:MessageIcon" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogIcon=$("$pBuddy" -c "Print :OptionalArguments:MessageIcon" "$renewConfig")
+fi
+
+#If Dark mode is enabled and a MessageIconDarkMode is defined in the configuration profile, set our variable to use it.
+if [ "$darkMode" = "enabled" ] && "$pBuddy" -c "Print :OptionalArguments:MessageIconDarkMode" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogIcon=$("$pBuddy" -c "Print :OptionalArguments:MessageIconDarkMode" "$renewConfig")
+fi
+
+if [ -z "$dialogIcon" ]; then
+	dialogIcon="SF=restart.circle color1=pink color2=blue"
+fi
+
+#Now do the same thing for a Banner image. We need some extra tidbits to just not include the --bannerimage flag at all if it isn't defined in the config
+#Define the banner image variable as empty
+bannerImage=''
+
+#If there is a banner icon defined in the configuration file, set it.
+if "$pBuddy" -c "Print :OptionalArguments:BannerImage" "$renewConfig" >/dev/null 2>&1 ; then
+	bannerImage=$("$pBuddy" -c "Print :OptionalArguments:BannerImage" "$renewConfig")
+fi
+
+#If Dark mode is enabled and a BannerImageDarkMode is defined in the configuration profile, set our variable to use it.
+if [ "$darkMode" = "enabled" ] && "$pBuddy" -c "Print :OptionalArguments:BannerImageDarkMode" "$renewConfig" >/dev/null 2>&1 ; then
+	bannerImage=$("$pBuddy" -c "Print :OptionalArguments:BannerImageDarkMode" "$renewConfig")
+fi
+
+if [ -z "$bannerImage" ]; then
+	bannerCommand=''
+else
+	bannerCommand="--bannerimage"
+fi
+
+#Now do the same thing for a notification icon. We need some extra tidbits to just not include the --icon flag at all if it isn't defined in the config
+#Define the notification icon variable as empty
+notificationIcon=''
+
+#If there is a banner icon defined in the configuration file, set it.
+if "$pBuddy" -c "Print :OptionalArguments:NotificationIcon" "$renewConfig" >/dev/null 2>&1 ; then
+	notificationIcon=$("$pBuddy" -c "Print :OptionalArguments:NotificationIcon" "$renewConfig")
+fi
+
+#If Dark mode is enabled and a NotificationIconDarkMode is defined in the configuration profile, set our variable to use it.
+if [ "$darkMode" = "enabled" ] && "$pBuddy" -c "Print :OptionalArguments:NotificationIconDarkMode" "$renewConfig" >/dev/null 2>&1 ; then
+	notificationIcon=$("$pBuddy" -c "Print :OptionalArguments:NotificationIconDarkMode" "$renewConfig")
+fi
+
+if [ -z "$notificationIcon" ]; then
+	notificationIconCommand=''
+else
+	notificationIconCommand="--icon"
+fi
 
 #Now do the logic to set the variables that will actually be used
 #This is tedious code that could be simplified with a function, but i couldn't get my brain around it
-#How do you set a variable to have the name of a argument you pass to a function? Need someone smarter than me.
-
-if "$pBuddy" -c "Print :OptionalArguments:MessageIcon" "$renewConfig" >/dev/null 2>&1 ; then
-	dialogIcon=$("$pBuddy" -c "Print :OptionalArguments:MessageIcon" "$renewConfig")
-	#If an icon is defined, but the file doesnt exist, fall back to default.
-	if [ ! -e "$dialogIcon" ]; then
-		dialogIcon="$defaultDialogIcon"
-	fi	
-else
-	dialogIcon="$defaultDialogIcon"
-fi
-
-if "$pBuddy" -c "Print :OptionalArguments:NotificationIcon" "$renewConfig" >/dev/null 2>&1 ; then
-	notificationIcon=$("$pBuddy" -c "Print :OptionalArguments:NotificationIcon" "$renewConfig")
-	#If an icon is defined, but the file doesnt exist, fall back to default.
-	if [ ! -e "$notificationIcon" ]; then
-		notificationIcon="$defaultNotificationIcon"
-	fi	
-else
-	notificationIcon="$defaultNotificationIcon"
-fi
+#How do you set a variable to have the name of a argument you pass to a function? Need someone smarter than me to clue me in on that one.
 
 if "$pBuddy" -c "Print :OptionalArguments:NormalMessage" "$renewConfig" >/dev/null 2>&1 ; then
 	dialogNormalMessage=$("$pBuddy" -c "Print :OptionalArguments:NormalMessage" "$renewConfig")
@@ -314,7 +428,6 @@ else
 	dialogTitle="$defaultDialogTitle"
 fi
 
-###BUTTONS####
 if "$pBuddy" -c "Print :OptionalArguments:RestartButtonText" "$renewConfig" >/dev/null 2>&1 ; then
 	dialogRestartButtonText=$("$pBuddy" -c "Print :OptionalArguments:RestartButtonText" "$renewConfig")
 else
@@ -355,9 +468,10 @@ fi
 function exec_aggro_mode()
 {
 
-debug_message "Executing aggressive mode"
+log_message "Executing aggressive mode"
 
 #go aggro
+	check_assertions
 
 	"$dialogPath" -o \
 	--title "$dialogTitle" \
@@ -365,6 +479,7 @@ debug_message "Executing aggressive mode"
 	--button1disabled \
 	--infobuttontext "$dialogRestartButtonText" \
 	--icon "$dialogIcon" \
+	"$bannerCommand" "$bannerImage" \
 	--messagealignment centre \
 	--centericon \
 	--messagealignment center \
@@ -383,17 +498,19 @@ function exec_normal_mode()
 
 {
 
-debug_message "Executing normal mode"
+log_message "Executing normal mode"
 
 
 #go normal
-	
+	check_assertions
+
 	"$dialogPath" -o \
 	--title "$dialogTitle" \
 	--infobuttontext "$dialogRestartButtonText" \
 	--button1text "$dialogDeferralButtonText" \
 	--centericon \
 	--icon "$dialogIcon" \
+	"$bannerCommand" "$bannerImage" \
 	--messagealignment centre \
 	--quitkey "$secretQuitKey" \
 	$(echo $dialogAdditionalOptions) \
@@ -407,15 +524,14 @@ debug_message "Executing normal mode"
 #Define what happens when Notification mode is engaged
 function exec_notification_mode()
 {
-
-debug_message "Executing notification mode"
+log_message "Executing notification mode"
 
 #go notification
-
+	check_assertions
 	"$dialogPath" \
 	--notification \
 	--title "$dialogTitle" \
-	--icon "$notificationIcon" \
+	"$notificationIconCommand" "$notificationIcon" \
 	--message "$dialogNotificationMessage" \
 	
 	((notificationCount=notificationCount+1))
@@ -429,13 +545,13 @@ debug_message "Executing notification mode"
 #This function adds to the deferral count and sets an active deferral time
 function exec_deferral()
 {
-	debug_message "Executing deferral process."
+	log_message "Executing deferral process."
 	((currentDeferralCount=currentDeferralCount+1))
-	debug_message "New current deferral count: $currentDeferralCount"
+	log_message "New current deferral count: $currentDeferralCount"
 	"$pBuddy" -c "Set :CurrentDeferralCount $currentDeferralCount" "$userDeferralProfile"
-	debug_message "New defer until value: $deferUntil"
+	log_message "New defer until value: $deferUntil"
 	"$pBuddy" -c "Set :ActiveDeferral $deferUntil" "$userDeferralProfile"
-	debug_message "New human readabale deferral date: $humanReadableDeferDate"
+	log_message "New human readabale deferral date: $humanReadableDeferDate"
 	"$pBuddy" -c "Set :HumanReadableDeferDate $humanReadableDeferDate" "$userDeferralProfile"
 }
 
@@ -444,7 +560,7 @@ if [ "$dryRun" = 1 ]; then
 
 function exec_restart()
 {
-	debug_message "DRY-RUN: Restart would happen here"
+	log_message "DRY-RUN: Restart would happen here"
 	exit 0
 }
 
@@ -454,7 +570,7 @@ else
 function exec_restart()
 {
 
-debug_message "Executing restart!"
+log_message "Executing restart!"
 
 #This is the restart command. Thank you Dan Snelson: https://snelson.us/2022/07/log-out-restart-shut-down/
 
@@ -463,6 +579,48 @@ osascript -e 'tell app "loginwindow" to «event aevtrrst»'
 }
 
 fi
+
+#By default, we wnat to ignore some specific app assertions (caffeinate, Amphetamine, obs). These aren't actual indicators of what we're looking for.
+assertionsToIgnore=()
+assertionsToIgnore+="obs"
+assertionsToIgnore+="Amphetamine"
+assertionsToIgnore+="caffeinate"
+
+function check_assertions()
+{
+##Thank you @Pico for the commands to check for the screen being awake and unlocked
+#Check if the screen is asleep. Exit quietly without a deferral if it s not awake.
+if [[ "$(osascript -l 'JavaScript' -e 'ObjC.import("CoreGraphics"); $.CGDisplayIsActive($.CGMainDisplayID())')" == '1' ]]; then
+    debug_message "Screen is awake"
+else
+    log_message "Screen is asleep. Exiting without event or deferral."
+    exit 0
+fi
+
+#Check if the screen is locked. Exit quietly without a deferral if it s not unlocked.
+if [[ "$(/usr/libexec/PlistBuddy -c "Print :IOConsoleUsers:0:CGSSessionScreenIsLocked" /dev/stdin <<< "$(ioreg -ac IORegistryEntry -k IOConsoleUsers -d 1)" 2> /dev/null)" != 'true' ]]; then
+    debug_message "Screen is unlocked"
+else
+    log_message "Screen is locked. Exiting without event or deferral."
+    exit 0
+fi
+
+#Check for active screen assertions. If an application is preventing the screen from sleeping, we don't notify. It typically means user is in a video meeting or watching a video.
+checkForAssertion=$(pmset -g | grep "display sleep prevented by"| sed 's/.*(\(.*\))/\1/' | sed 's/display sleep prevented by //'| sed 's/,//g')
+
+for i in "${assertionsToIgnore[@]}"; do
+	checkForAssertion=$(echo "$checkForAssertion" | sed "s/$i//" | xargs )
+done
+	
+if [ -n "$checkForAssertion" ]; then
+    log_message "Display sleep assertion(s) identified: $checkForAssertion ... Exiting."
+    exit 0
+else
+	debug_message "No assertions stopping us from notifying."
+fi
+
+
+}
 
 ##################################################################
 #
@@ -487,7 +645,7 @@ uptime_days="$(( uptime_hours / 24 ))"
 
 debug_message "Uptime values are: $uptime_days days = $uptime_hours hours = $uptime_minutes minutes = $uptime_seconds seconds"
 
-deferUntilSeconds=$((deferralDuration * 60 * 60))
+deferUntilSeconds=$((deferralDuration * 60 * 60 - 300))
 deferUntil=$((current_unix_time+deferUntilSeconds))
 
 debug_message "Defer Until: "$deferUntil" which is $(date -j -f %s $deferUntil)"
@@ -501,7 +659,7 @@ humanReadableDeferDate=$(date -j -f %s $deferUntil)
 
 #To reset deferrals, execute sript with /Renew.sh --reset
 if [ "$1" = "--reset" ]; then
-		reset_deferral_profile && debug_message "Resetting deferrals." || { debug_message "ERROR: Could not reset deferral profile. Probably a permissions issue." ; exit 1 ; }
+		reset_deferral_profile && log_message "Resetting deferrals." || { log_message "ERROR: Could not reset deferral profile. Probably a permissions issue." ; exit 2 ; }
 	exit 0
 fi
 
@@ -542,10 +700,12 @@ fi
 # This section has the primary logic that dictates the user experience
 #
 ##################################################################
+#Test if we can write to the log file
+echo "$(date): Renew - Executing logic" >> "$logFile" || { echo "ERROR: Cannot write to log file. Exiting" ; exit 2 ; }
 
 #Are we in a deferral time range? If so, exit quietly.
 if [ $activeDeferral -ge $current_unix_time ]; then
-	debug_message "A deferral is active. Exiting."
+	log_message "A deferral is active. Exiting."
 	exit 0
 fi
 
@@ -568,23 +728,22 @@ if [ "$uptime_days" -ge "$uptimeThreshold" ]; then
 	#User has made a selection. Now we process it.
 	debug_message "DIALOG EXIT CODE: $dialgoExitCode."
 
-	
 	if [[ "$dialogExitCode" = 0 ]]; then
-		debug_message "USER ACTION: User chose deferral."
+		log_message "USER ACTION: User chose deferral."
 		exec_deferral
 	elif [[ "$dialogExitCode" = 10 ]]; then
-		debug_message "USER ACTION: User pressed the secret quit button."
+		log_message "USER ACTION: User pressed the secret quit button."
 		exit $dialogExitCode
 	elif [[ "$dialogExitCode" = 3 ]]; then
-		debug_message "USER ACTION: User chose to restart now."
+		log_message "USER ACTION: User chose to restart now."
 		exec_restart
 	else
-		debug_message "USER ACTION: Dialog exited with an unexpected code. Possibly it was killed unexpectedly."
+		log_message "USER ACTION: Dialog exited with an unexpected code. Possibly it was killed unexpectedly."
 		exit $dialogExitCode
 	fi
 else
 	#No enforcement needed, so we set deferrals to zero
-	debug_message "Device does not need to be restarted."
+	log_message "Device does not need to be restarted."
 	reset_deferral_profile
 fi
 
