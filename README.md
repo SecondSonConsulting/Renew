@@ -45,4 +45,4 @@ A huge thanks to Bart Reardon for creating and maintaining [Swift Dialog](https:
 
 It should be obvious to anyone familiar with [Nudge](https://github.com/macadmins/nudge) that some of the basic concepts of Renew are influenced by it. Thank you Erik Gomez for providing your hard work to the community for free.
 
-A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @Brock Walters @Josh Rickets and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
+A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @adamcodega @Brock Walters @Josh Rickets and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
