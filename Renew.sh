@@ -247,7 +247,6 @@ deferralsRemaining=$((maximumDeferrals-currentDeferralCount))
 defaultDialogAdditionalOptions=""
 defaultDialogAggressiveOptions=""
 defaultSecretQuitKey="]"
-defaultDialogIcon="SF=bolt.circle color1=pink color2=blue"
 defaultNotificationIcon=""
 
 #Language Support starts here. There is probably a cleaner way to get this.
