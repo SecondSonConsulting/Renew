@@ -25,11 +25,6 @@ userHomeFolder=$(dscl . -read /users/${currentUser} NFSHomeDirectory | cut -d " 
 logDir="$userHomeFolder/Library/Application Support/Renew"
 logFile="$logDir"/Renew.log
 
-#Check if the log folder exists, if not then make it. 
-if [ ! -d "$logDir" ]; then
-	mkdir -p "$logDir"
-fi
-	
 #Used only for debugging. Gives feedback into standard out if dryRun=1, also to $logFile if you set it
 function debug_message()
 {
@@ -54,6 +49,22 @@ fi
 
 }
 
+#Check if the log folder exists, if not then make it. 
+if [ ! -d "$logDir" ]; then
+	mkdir -p "$logDir"
+fi
+
+#Create the log file if its missing
+touch "$logFile"
+
+#If the log file is over 3k lines, make a new log file. We keep one old version and write over the top of it when rotating
+logLength=$(wc -l < "$logFile" | xargs)
+if [ "$logLength" -ge 3000 ]; then
+	debug_message "Rotating Logs"
+	mv "$logFile" "${logDir}/old_Renew.log"
+	touch "$logFile"
+	log_message "Logfile Rotated"
+fi
 
 #Path to mobileconfig payload
 renewConfig="/Library/Managed Preferences/com.secondsonconsulting.renew.plist"
