@@ -23,12 +23,14 @@ A means to initiate the script (typically a LaunchAgent)
 
 ## Screenshots
 ### Notification Mode Default User Experience
-![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NotificationDefault.png?raw=true)
+![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NotificationDefault.png?raw=true#gh-light-mode-only)
+![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NotificationDefault_Dark.png?raw=true#gh-dark-mode-only)
 ### Normal Mode Default User Experience
 ![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NormalDefaultDialog.png?raw=true#gh-light-mode-only)
 ![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NormalDefaultDialog_Dark.png?raw=true#gh-dark-mode-only)
 ### Aggressive Mode Default User Experience
-![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-AggressiveDefaultDialog.png?raw=true)
+![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-AggressiveDefaultDialog_Dark.png?raw=true#gh-dark-mode-only)
+![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-AggressiveDefaultDialog.png?raw=true#gh-light-mode-only)
 ### Custom Fields Design Example Image
 SwiftDialog allows a high degree of customization, and Renew allows you to continue to easily take advantage of that. This is an example of how you can customize the user experience to suit your branding and taste.
 
@@ -38,7 +40,8 @@ This example uses a banner image tailored to the window size, and the following 
 
 `<string>--width 300 --height 350 --messagefont size=15 --position topright --ontop --messagealignment centre</string>`
 
-<img src="https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog.png?raw=true" width="300" >
+![Renew Customized Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog_Dark.png?raw=true#gh-dark-mode-only)
+![Renew Customized Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog.png?raw=true#gh-light-mode-only)
 
 ## Thank you!
 This project is made possible by the awesome folks on the MacAdmins slack for their support and community projects.
