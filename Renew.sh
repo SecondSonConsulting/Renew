@@ -326,29 +326,73 @@ case "$languageChoice" in
     ;;
 esac
 
-#Now do the logic to set the variables that will actually be used
-#This is tedious code that could be simplified with a function, but i couldn't get my brain around it
-#How do you set a variable to have the name of a argument you pass to a function? Need someone smarter than me.
+##Icon setup and Dark Mode Detection
+#Test whether DarkMode is enabled, and set darkMode variable accordingly
+$(defaults read -g AppleInterfaceStyle  > /dev/null 2>&1 | grep -q "Dark" ) && darkMode="enabled" || darkMode="disabled"
 
+##Make sure $dialogIcon is an empty value, then the logic is:
+#if an icon is defined, but no dark mode is defined, use it whether dark mode is enabled or not
+#if an icon is defined AND a dark mode icon is defined, then use the appropriate one
+#If no icon is defined, set to the script default value
+dialogIcon=''
+
+#If a MessageIcon is defined in the configuration profile, set our variable to use it.
 if "$pBuddy" -c "Print :OptionalArguments:MessageIcon" "$renewConfig" >/dev/null 2>&1 ; then
 	dialogIcon=$("$pBuddy" -c "Print :OptionalArguments:MessageIcon" "$renewConfig")
-	#If an icon is defined, but the file doesnt exist, fall back to default.
-	if [ ! -e "$dialogIcon" ]; then
-		dialogIcon="$defaultDialogIcon"
-	fi	
-else
-	dialogIcon="$defaultDialogIcon"
 fi
 
+#If Dark mode is enabled and a MessageIconDarkMode is defined in the configuration profile, set our variable to use it.
+if [ "$darkMode" = "enabled" ] && "$pBuddy" -c "Print :OptionalArguments:MessageIconDarkMode" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogIcon=$("$pBuddy" -c "Print :OptionalArguments:MessageIconDarkMode" "$renewConfig")
+fi
+
+if [ -z "$dialogIcon" ]; then
+	dialogIcon="SF=restart.circle color1=pink color2=blue"
+fi
+
+#Now do the same thing for a Banner image. We need some extra tidbits to just not include the --bannerimage flag at all if it isn't defined in the config
+#Define the banner image variable as empty
+bannerImage=''
+
+#If there is a banner icon defined in the configuration file, set it.
+if "$pBuddy" -c "Print :OptionalArguments:BannerImage" "$renewConfig" >/dev/null 2>&1 ; then
+	bannerImage=$("$pBuddy" -c "Print :OptionalArguments:BannerImage" "$renewConfig")
+fi
+
+#If Dark mode is enabled and a BannerImageDarkMode is defined in the configuration profile, set our variable to use it.
+if [ "$darkMode" = "enabled" ] && "$pBuddy" -c "Print :OptionalArguments:BannerImageDarkMode" "$renewConfig" >/dev/null 2>&1 ; then
+	bannerImage=$("$pBuddy" -c "Print :OptionalArguments:BannerImageDarkMode" "$renewConfig")
+fi
+
+if [ -z "$bannerImage" ]; then
+	bannerCommand=''
+else
+	bannerCommand="--bannerimage"
+fi
+
+#Now do the same thing for a notification icon. We need some extra tidbits to just not include the --icon flag at all if it isn't defined in the config
+#Define the notification icon variable as empty
+notificationIcon=''
+
+#If there is a banner icon defined in the configuration file, set it.
 if "$pBuddy" -c "Print :OptionalArguments:NotificationIcon" "$renewConfig" >/dev/null 2>&1 ; then
 	notificationIcon=$("$pBuddy" -c "Print :OptionalArguments:NotificationIcon" "$renewConfig")
-	#If an icon is defined, but the file doesnt exist, fall back to default.
-	if [ ! -e "$notificationIcon" ]; then
-		notificationIcon="$defaultNotificationIcon"
-	fi	
-else
-	notificationIcon="$defaultNotificationIcon"
 fi
+
+#If Dark mode is enabled and a NotificationIconDarkMode is defined in the configuration profile, set our variable to use it.
+if [ "$darkMode" = "enabled" ] && "$pBuddy" -c "Print :OptionalArguments:NotificationIconDarkMode" "$renewConfig" >/dev/null 2>&1 ; then
+	notificationIcon=$("$pBuddy" -c "Print :OptionalArguments:NotificationIconDarkMode" "$renewConfig")
+fi
+
+if [ -z "$notificationIcon" ]; then
+	notificationIconCommand=''
+else
+	notificationIconCommand="--icon"
+fi
+
+#Now do the logic to set the variables that will actually be used
+#This is tedious code that could be simplified with a function, but i couldn't get my brain around it
+#How do you set a variable to have the name of a argument you pass to a function? Need someone smarter than me to clue me in on that one.
 
 if "$pBuddy" -c "Print :OptionalArguments:NormalMessage" "$renewConfig" >/dev/null 2>&1 ; then
 	dialogNormalMessage=$("$pBuddy" -c "Print :OptionalArguments:NormalMessage" "$renewConfig")
@@ -425,6 +469,7 @@ log_message "Executing aggressive mode"
 	--button1disabled \
 	--infobuttontext "$dialogRestartButtonText" \
 	--icon "$dialogIcon" \
+	"$bannerCommand" "$bannerImage" \
 	--messagealignment centre \
 	--centericon \
 	--messagealignment center \
@@ -455,6 +500,7 @@ log_message "Executing normal mode"
 	--button1text "$dialogDeferralButtonText" \
 	--centericon \
 	--icon "$dialogIcon" \
+	"$bannerCommand" "$bannerImage" \
 	--messagealignment centre \
 	--quitkey "$secretQuitKey" \
 	$(echo $dialogAdditionalOptions) \
@@ -468,16 +514,14 @@ log_message "Executing normal mode"
 #Define what happens when Notification mode is engaged
 function exec_notification_mode()
 {
-
 log_message "Executing notification mode"
 
 #go notification
 	check_assertions
-
 	"$dialogPath" \
 	--notification \
 	--title "$dialogTitle" \
-	--icon "$notificationIcon" \
+	"$notificationIconCommand" "$notificationIcon" \
 	--message "$dialogNotificationMessage" \
 	
 	((notificationCount=notificationCount+1))
@@ -544,7 +588,7 @@ else
 fi
 
 #Check if the screen is locked. Exit quietly without a deferral if it s not unlocked.
-if [[ "$(/usr/libexec/PlistBuddy -c 'Print :IOConsoleUsers:0:CGSSessionScreenIsLocked' /dev/stdin <<< "$(ioreg -ac IORegistryEntry -k IOConsoleUsers -d 1)" 2> /dev/null)" != 'true' ]]; then
+if [[ "$(/usr/libexec/PlistBuddy -c "Print :IOConsoleUsers:0:CGSSessionScreenIsLocked" /dev/stdin <<< "$(ioreg -ac IORegistryEntry -k IOConsoleUsers -d 1)" 2> /dev/null)" != 'true' ]]; then
     debug_message "Screen is unlocked"
 else
     log_message "Screen is locked. Exiting without event or deferral."
