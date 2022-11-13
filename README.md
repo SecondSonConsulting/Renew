@@ -36,7 +36,7 @@ This example uses a banner image tailored to the window size, and the following 
 `<key>AdditionalDialogOptions</key>`
 
 `<string>--width 300 --height 350 --messagefont size=15 --position topright --ontop --messagealignment centre</string>`
-![Renew Customized Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog.png?raw=true)
+![Renew Customized Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog.png?raw=true | width=300)
 
 ## Thank you!
 This project is made possible by the awesome folks on the MacAdmins slack for their support and community projects.
