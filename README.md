@@ -25,7 +25,8 @@ A means to initiate the script (typically a LaunchAgent)
 ### Notification Mode Default User Experience
 ![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NotificationDefault.png?raw=true)
 ### Normal Mode Default User Experience
-![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NormalDefaultDialog.png?raw=true)
+![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NormalDefaultDialog.png?raw=true#gh-light-mode-only)
+![Renew Normal Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NormalDefaultDialog_Dark.png?raw=true#gh-dark-mode-only)
 ### Aggressive Mode Default User Experience
 ![Renew Aggressive Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-AggressiveDefaultDialog.png?raw=true)
 ### Custom Fields Design Example Image
@@ -36,7 +37,8 @@ This example uses a banner image tailored to the window size, and the following 
 `<key>AdditionalDialogOptions</key>`
 
 `<string>--width 300 --height 350 --messagefont size=15 --position topright --ontop --messagealignment centre</string>`
-![Renew Customized Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog.png?raw=true)
+
+<img src="https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog.png?raw=true" width="300" >
 
 ## Thank you!
 This project is made possible by the awesome folks on the MacAdmins slack for their support and community projects.
@@ -45,4 +47,4 @@ A huge thanks to Bart Reardon for creating and maintaining [Swift Dialog](https:
 
 It should be obvious to anyone familiar with [Nudge](https://github.com/macadmins/nudge) that some of the basic concepts of Renew are influenced by it. Thank you Erik Gomez for providing your hard work to the community for free.
 
-A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @Brock Walters @Josh Rickets and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
+A resounding shoutout to all of the members of the MacAdmins community for their guidance and education on all things macOS, especially the gurus in the #scripting channel for their endless patience and assistance as we worked to increase our scripting knowledge. @pico @scriptingosx @adamcodega @Brock Walters @Josh Rickets and many more I'm probably forgetting. Thank you for your patient guidance on all things macOS.
