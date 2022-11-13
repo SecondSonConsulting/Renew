@@ -40,10 +40,8 @@ This example uses a banner image tailored to the window size, and the following 
 
 `<string>--width 300 --height 350 --messagefont size=15 --position topright --ontop --messagealignment centre</string>`
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog_Dark.png?raw=true" width=300 >
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog.png?raw=true">
-</picture>
+![Renew Customized Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog_Dark.png?raw=true#gh-dark-mode-only)
+![Renew Customized Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-CustomizedDialog.png?raw=true#gh-light-mode-only)
 
 ## Thank you!
 This project is made possible by the awesome folks on the MacAdmins slack for their support and community projects.
