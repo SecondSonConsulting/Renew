@@ -257,6 +257,9 @@ deferralsRemaining=$((maximumDeferrals-currentDeferralCount))
 #If no argument is given in the config file, set the script default
 defaultDialogAdditionalOptions=""
 defaultDialogAggressiveOptions=""
+defaultDialogNormalOptions=""
+defaultDialogNotificationOptions=""
+defaultSubtitleOptions=""
 defaultSecretQuitKey="]"
 defaultNotificationIcon=""
 
@@ -458,11 +461,36 @@ else
 	dialogAggressiveOptions="$defaultDialogAggressiveOptions"
 fi
 
+if "$pBuddy" -c "Print :OptionalArguments:AdditionalNormalOptions" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogNormalOptions=$("$pBuddy" -c "Print :OptionalArguments:AdditionalNormalOptions" "$renewConfig")
+else
+	dialogNormalOptions="$defaultDialogNormalOptions"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:AdditionalNotificationOptions" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogNotificationOptions=$("$pBuddy" -c "Print :OptionalArguments:AdditionalNotificationOptions" "$renewConfig")
+else
+	dialogNotificationOptions="$defaultDialogNotificationOptions"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:NotificationSubtitle" "$renewConfig" >/dev/null 2>&1 ; then
+	subtitleOptions=$("$pBuddy" -c "Print :OptionalArguments:NotificationSubtitle" "$renewConfig")
+else
+	subtitleOptions="$defaultSubtitleOptions"
+fi
+
 if "$pBuddy" -c "Print :OptionalArguments:SecretQuitKey" "$renewConfig" >/dev/null 2>&1 ; then
 	secretQuitKey=$("$pBuddy" -c "Print :OptionalArguments:SecretQuitKey" "$renewConfig")
 else
 	secretQuitKey="$defaultSecretQuitKey"
 fi
+
+if [ -z "$subtitleOptions" ]; then
+	subtitleCommand=''
+else
+	subtitleCommand="--subtitle"
+fi
+
 
 #Define what happens when Aggressive mode is engaged
 function exec_aggro_mode()
@@ -514,6 +542,7 @@ log_message "Executing normal mode"
 	--messagealignment centre \
 	--quitkey "$secretQuitKey" \
 	$(echo $dialogAdditionalOptions) \
+	$(echo $dialogNormalOptions) \
 	--message "$dialogNormalMessage $deferralsRemaining" \
 
 	#Set exit code based on user input
@@ -526,6 +555,8 @@ function exec_notification_mode()
 {
 log_message "Executing notification mode"
 
+set -x
+
 #go notification
 	check_assertions
 	"$dialogPath" \
@@ -533,9 +564,14 @@ log_message "Executing notification mode"
 	--title "$dialogTitle" \
 	"$notificationIconCommand" "$notificationIcon" \
 	--message "$dialogNotificationMessage" \
+	$(echo $dialogAdditionalOptions) \
+	$(echo $dialogNotificationOptions) \
+	"$subtitleCommand" "$subtitleOptions"
 	
 	((notificationCount=notificationCount+1))
 	"$pBuddy" -c "Set :NotificationCount $notificationCount" "$userDeferralProfile"
+
+	set +x
 	
 	exec_deferral
 	
