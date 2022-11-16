@@ -2,7 +2,7 @@
 #set -x
 
 ##Renew.sh
-scriptVersion="Beta 0.1.8"
+scriptVersion="Beta 0.1.9"
 
 #Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 
@@ -473,7 +473,7 @@ log_message "Executing aggressive mode"
 #go aggro
 	check_assertions
 
-	"$dialogPath" -o \
+	"$dialogPath" \
 	--title "$dialogTitle" \
 	--button1text "$dialogNoDeferralsRemainingButtonText" \
 	--button1disabled \
@@ -504,7 +504,7 @@ log_message "Executing normal mode"
 #go normal
 	check_assertions
 
-	"$dialogPath" -o \
+	"$dialogPath" \
 	--title "$dialogTitle" \
 	--infobuttontext "$dialogRestartButtonText" \
 	--button1text "$dialogDeferralButtonText" \
@@ -726,7 +726,7 @@ if [ "$uptime_days" -ge "$uptimeThreshold" ]; then
 	fi
 	
 	#User has made a selection. Now we process it.
-	debug_message "DIALOG EXIT CODE: $dialgoExitCode."
+	debug_message "DIALOG EXIT CODE: $dialogExitCode."
 
 	if [[ "$dialogExitCode" = 0 ]]; then
 		log_message "USER ACTION: User chose deferral."
