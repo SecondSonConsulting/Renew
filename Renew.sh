@@ -726,7 +726,7 @@ if [ "$uptime_days" -ge "$uptimeThreshold" ]; then
 	fi
 	
 	#User has made a selection. Now we process it.
-	debug_message "DIALOG EXIT CODE: $dialgoExitCode."
+	debug_message "DIALOG EXIT CODE: $dialogExitCode."
 
 	if [[ "$dialogExitCode" = 0 ]]; then
 		log_message "USER ACTION: User chose deferral."
