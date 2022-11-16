@@ -473,7 +473,7 @@ log_message "Executing aggressive mode"
 #go aggro
 	check_assertions
 
-	"$dialogPath" -o \
+	"$dialogPath" \
 	--title "$dialogTitle" \
 	--button1text "$dialogNoDeferralsRemainingButtonText" \
 	--button1disabled \
@@ -504,7 +504,7 @@ log_message "Executing normal mode"
 #go normal
 	check_assertions
 
-	"$dialogPath" -o \
+	"$dialogPath" \
 	--title "$dialogTitle" \
 	--infobuttontext "$dialogRestartButtonText" \
 	--button1text "$dialogDeferralButtonText" \
