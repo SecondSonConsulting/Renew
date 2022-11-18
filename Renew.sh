@@ -188,6 +188,12 @@ elif [ "$1" = "--force-normal" ]; then
 elif [ "$1" = "--force-notification" ]; then
 	log_message "--force-notification used. Notification mode will be executed regardless of deferrals or uptime."
 	forceNotification=1
+elif [ "$1" = "--defer5" ]; then
+	log_message "--defer5 used. Setting a deferral for 5 minutes from now"
+	forceDeferral='300'	
+elif [ "$1" = "--defer10" ]; then
+	log_message "--defer5 used. Setting a deferral for 5 minutes from now"
+	forceDeferral='600'	
 elif [ "$1" = "--reset" ]; then
 	log_message "--reset used. Resetting deferral profile and exiting."
 	reset_deferral_profile
@@ -762,6 +768,18 @@ if [ "$forceNotification" = 1 ]; then
 	debug_message "FORCE-NOTIFICAION: Setting activeDeferral to $activeDeferral for testing purposes."
 	exec_notification_mode
 fi
+
+#Check if we're forcing a deferral
+if [ -n "$forceDeferral" ]; then
+	set -x
+	deferUntilSeconds="$forceDeferral"
+	echo $current_unix_time
+	deferUntil=$((current_unix_time+deferUntilSeconds))
+	humanReadableDeferDate=$(date -j -f %s $deferUntil)
+	exec_deferral
+	exit 0
+fi
+
 
 ##################################################################
 #
