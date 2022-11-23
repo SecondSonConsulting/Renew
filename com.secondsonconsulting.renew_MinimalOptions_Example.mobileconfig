@@ -29,6 +29,7 @@
 			<key>OptionalArguments</key>
 			<dict>
 				<key>Deadline</key>
+				<integer>30</integer>
 			</dict>
 		</dict>
 	</array>
