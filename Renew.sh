@@ -171,12 +171,10 @@ defaults delete "$userDeferralProfile" >/dev/null 2>&1
 
 }
 
-##Check for testing parameters. This section could be redone using getopts, but the purpose of this script is not to be used with arguments. Arguments are just for testing, and are limited to 1 argument each run.
+##Check for testing parameters. This section could be redone using getopts, but the purpose of this script is not to be used with arguments. 
+#Arguments are just for testing, and are limited to 1 argument each run.
 
-if [ -n "$2" ]; then
-	log_message "ERROR: Invalid arguments: $@"
-	exit 4
-elif [ "$1" = "--dry-run" ]; then
+if [ "$1" = "--dry-run" ]; then
 	log_message "--dry-run used. Device will not restart during this run."
 	dryRun=1
 elif  [ "$1" = "--force-aggro" ]; then
@@ -188,12 +186,11 @@ elif [ "$1" = "--force-normal" ]; then
 elif [ "$1" = "--force-notification" ]; then
 	log_message "--force-notification used. Notification mode will be executed regardless of deferrals or uptime."
 	forceNotification=1
-elif [ "$1" = "--defer5" ]; then
-	log_message "--defer5 used. Setting a deferral for 5 minutes from now"
-	forceDeferral='300'	
-elif [ "$1" = "--defer10" ]; then
-	log_message "--defer5 used. Setting a deferral for 5 minutes from now"
-	forceDeferral='600'	
+elif [ "$1" = "--defer" ]; then
+	log_message "--defer $2 used. Setting a deferral for $2 minutes from now"
+	forceDeferralMinutes="$2"
+	forceDeferral=$((forceDeferralMinutes*60))
+	reset_deferral_profile
 elif [ "$1" = "--reset" ]; then
 	log_message "--reset used. Resetting deferral profile and exiting."
 	reset_deferral_profile
@@ -769,9 +766,9 @@ if [ "$forceNotification" = 1 ]; then
 	exec_notification_mode
 fi
 
+echo "***FORCEDEFERRAL LOGIC"
 #Check if we're forcing a deferral
-if [ -n "$forceDeferral" ]; then
-	set -x
+if [ -n "$forceDeferralMinutes" ]; then
 	deferUntilSeconds="$forceDeferral"
 	echo $current_unix_time
 	deferUntil=$((current_unix_time+deferUntilSeconds))
