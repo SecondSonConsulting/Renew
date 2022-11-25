@@ -2,7 +2,7 @@
 #set -x
 
 ##Renew.sh
-scriptVersion="Beta 0.1.8"
+scriptVersion="Beta 0.1.10"
 
 #Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 
@@ -80,7 +80,7 @@ userDeferralProfile="$userHomeFolder/Library/Preferences/com.secondsonconsulting
 
 #This is up top so that it runs even if no validation succeeds.
 if [ "$1" = "--version" ]; then
-	log_message "--version argument passed. Printing version information and exiting."
+	log_message "--version argument detected. Printing version information and exiting."
 	echo "Renew.sh version: $scriptVersion"
 	echo "SwiftDialog Version: $($dialogPath --version)"
 	exit 0
@@ -171,12 +171,10 @@ defaults delete "$userDeferralProfile" >/dev/null 2>&1
 
 }
 
-##Check for testing parameters. This section could be redone using getopts, but the purpose of this script is not to be used with arguments. Arguments are just for testing, and are limited to 1 argument each run.
+##Check for testing parameters. This section could be redone using getopts, but the purpose of this script is not to be used with arguments. 
+#Arguments are just for testing, and are limited to 1 argument each run.
 
-if [ -n "$2" ]; then
-	log_message "ERROR: Invalid arguments: $@"
-	exit 4
-elif [ "$1" = "--dry-run" ]; then
+if [ "$1" = "--dry-run" ]; then
 	log_message "--dry-run used. Device will not restart during this run."
 	dryRun=1
 elif  [ "$1" = "--force-aggro" ]; then
@@ -188,6 +186,11 @@ elif [ "$1" = "--force-normal" ]; then
 elif [ "$1" = "--force-notification" ]; then
 	log_message "--force-notification used. Notification mode will be executed regardless of deferrals or uptime."
 	forceNotification=1
+elif [ "$1" = "--defer" ]; then
+	log_message "--defer $2 used. Setting a deferral for $2 minutes from now"
+	forceDeferralMinutes="$2"
+	forceDeferral=$((forceDeferralMinutes*60))
+	reset_deferral_profile
 elif [ "$1" = "--reset" ]; then
 	log_message "--reset used. Resetting deferral profile and exiting."
 	reset_deferral_profile
@@ -197,7 +200,7 @@ elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	help_message
 	exit 0
 elif [ "$1" = "" ]; then
-	debug_message "No testing arguments passed during execution."
+	debug_message "No testing arguments detected during execution."
 else
 	debug_message "ERROR: Invalid arguments given. Printing help message and exiting."
 	help_message
@@ -257,6 +260,9 @@ deferralsRemaining=$((maximumDeferrals-currentDeferralCount))
 #If no argument is given in the config file, set the script default
 defaultDialogAdditionalOptions=""
 defaultDialogAggressiveOptions=""
+defaultDialogNormalOptions=""
+defaultDialogNotificationOptions=""
+defaultSubtitleOptions=""
 defaultSecretQuitKey="]"
 defaultNotificationIcon=""
 
@@ -267,7 +273,7 @@ languagesArray=( $(defaults read .GlobalPreferences AppleLanguages ) )
 #Array entry 1 is a parenthesis and entry 2 is the language. Grab just the first two characters of the 2nd entry in the array
 languageChoice=${languagesArray[2]:1:2}
 
-#languageChoice="en"
+#languageChoice="it"
 
 debug_message "Language identified: $languageChoice"
 
@@ -286,53 +292,58 @@ case "$languageChoice" in
        #Define script default messaging FRENCH
        #Credit and thanks to Martin Cech (@martinc on MacAdmins Slack)
        defaultDialogTitle="Veuillez redemarrer"
-       defaultDialogNormalMessage="Afin de garder votre système sain et sécurisé, il doit être redémarré.  \n**Veuillez enregistrer votre travail** et redemarrer dès que possible.\n\nReports restants jusqu'au redémarrage requis:  "
+       defaultDialogNormalMessage="Afin de garder votre système sain et sécurisé, il doit être redémarré.  \n**Veuillez enregistrer votre travail** et redemarrer dès que possible."
        defaultDialogAggroMessage="**Veuillez enregistrer votre travail et redémarrer**"
        defaultDialogNotificationMessage="Afin de garder votre système sain et sécurisé, il doit être redémarré.  \nVeuillez enregistrer votre travail et redémarrer dès que possible."
        defaultRestartButtonText="OK, Redémarrez maintenant je suis prêt"
        defaultDeferralButtonText="Pas maintenant, rappelle-moi plus tard..."
        defaultNoDeferralsRemainingButtonText="Aucun report restant"
+	   defaultDeferralMessage="Reports restants jusqu'au redémarrage requis:  "
    ;;
    es)
        #Define script default messaging ESPANIOL
        defaultDialogTitle="Por favor reinicie"
-       defaultDialogNormalMessage="Para mantener su sistema seguro y funcionando, necesitamos que reinicie.  \n**Por favor guarda tus archivos ** y reinicia lo antes posible.\n\nDeferrals remaining until required restart:  "
-       defaultDialogAggroMessage="**Guarde su trabajo y reinicie por favor **"
+       defaultDialogNormalMessage="Para mantener su sistema seguro y funcionando, necesitamos que reinicie.  \n**Por favor guarda tus archivos** y reinicia lo antes posible."
+       defaultDialogAggroMessage="**Guarde su trabajo y reinicie por favor**"
        defaultDialogNotificationMessage="Para mantener su sistema seguro y funcionando, necesitamos que reinicie.  \nPor favor guarda tus archivos ."
        defaultRestartButtonText="OK vale, reinicie ahora, estoy listo"
        defaultDeferralButtonText="Ahora no, recuérdamelo mas tarde"
        defaultNoDeferralsRemainingButtonText="No deferrals remaining"
-   ;;
+	   defaultDeferralMessage="Deferrals remaining until required restart: "
+  ;;
    it)
        #Define script default messaging ITALIANO
        defaultDialogTitle="Per favore riavvia"
-       defaultDialogNormalMessage="Per mantenere il tuo sistema sicuro & performante, necessitiamo un riavvio.  \n**Per favore salva i tuoi lavori** e riavvia il prima possibile.\n\nDeferrals remaining until required restart:  "
+       defaultDialogNormalMessage="Per mantenere il tuo sistema sicuro & performante, necessitiamo un riavvio.  \n**Per favore salva i tuoi lavori** e riavvia il prima possibile."
        defaultDialogAggroMessage="**Salva i tuoi lavori e gentilmente riavvia**"
        defaultDialogNotificationMessage="Per mantenere il tuo sistema sicuro & performante, necessitiamo un riavvio.  \nPer favore salva i tuoi lavori e riavvia il prima possibile."
        defaultRestartButtonText="OK, Riavvia ora, sono pronto"
        defaultDeferralButtonText="Not ora ricordamelo più’ tardi"
        defaultNoDeferralsRemainingButtonText="No deferrals remaining"
+	   defaultDeferralMessage="Deferrals remaining until required restart: "
    ;;
    de)
 		#Define script default messaging DEUTSCH
        defaultDialogTitle="Bitte führen Sie einen Neustart durch"
-       defaultDialogNormalMessage="Um die Stabilität und Sicherheit Ihres Systems zu gewährleisten, ist ein Neustart erforderlich \n**Bitte speichern Sie Ihre Arbeit** und starten Sie Ihren Computer neu sobald als möglich \n\nDeferrals remaining until required restart:  "
+       defaultDialogNormalMessage="Um die Stabilität und Sicherheit Ihres Systems zu gewährleisten, ist ein Neustart erforderlich \n**Bitte speichern Sie Ihre Arbeit** und starten Sie Ihren Computer neu sobald als möglich."
        defaultDialogAggroMessage="**Bitte speichern Sie Ihre Arbeit und starten neu**"
-       defaultDialogNotificationMessage="Um die Stabilität und Sicherheit Ihres Systems zu gewährleisten, ist ein Neustart erforderlich \nBitte speichern Sie Ihre Arbeit und starten Sie Ihren Computer neu sobald als möglich "
+       defaultDialogNotificationMessage="Um die Stabilität und Sicherheit Ihres Systems zu gewährleisten, ist ein Neustart erforderlich \nBitte speichern Sie Ihre Arbeit und starten Sie Ihren Computer neu sobald als möglich. "
        defaultRestartButtonText="OK,, ich bin fertig, bitte starten Sie neu"
        defaultDeferralButtonText="Nicht jetzt, bitte erinnern Sie mich später"
        defaultNoDeferralsRemainingButtonText="Keine weitere Aufschiebung möglich"
+		defaultDeferralMessage="Deferrals remaining until required restart: "
    ;;
     *)
         ##English is the default and fallback language
 		#Define script default messaging ENGLISH
 		defaultDialogTitle="Please Restart"
-		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible.\n\nDeferrals remaining until required restart:  "
+		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
 		defaultDialogAggroMessage="**Please save your work and restart**"
 		defaultDialogNotificationMessage="In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
 		defaultRestartButtonText="OK, Restart Now I am Ready"
 		defaultDeferralButtonText="Not now, remind me later..."
 		defaultNoDeferralsRemainingButtonText="No deferrals remaining"
+		defaultDeferralMessage="Deferrals remaining until required restart: "
     ;;
 esac
 
@@ -410,6 +421,11 @@ else
 	dialogNormalMessage="$defaultDialogNormalMessage"
 fi
 
+# If ShowDeferralCount is active, adjust the dialogMessage
+if [[ $("$pBuddy" -c "Print :OptionalArguments:ShowDeferralCount" "$renewConfig" 2>&1) = 'true' ]] ; then
+	dialogNormalMessage="$dialogNormalMessage \n\n$defaultDeferralMessage $deferralsRemaining"
+fi
+
 if "$pBuddy" -c "Print :OptionalArguments:AggroMessage" "$renewConfig" >/dev/null 2>&1 ; then
 	dialogAggroMessage=$("$pBuddy" -c "Print :OptionalArguments:AggroMessage" "$renewConfig")
 else
@@ -458,10 +474,40 @@ else
 	dialogAggressiveOptions="$defaultDialogAggressiveOptions"
 fi
 
+if "$pBuddy" -c "Print :OptionalArguments:AdditionalNormalOptions" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogNormalOptions=$("$pBuddy" -c "Print :OptionalArguments:AdditionalNormalOptions" "$renewConfig")
+else
+	dialogNormalOptions="$defaultDialogNormalOptions"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:AdditionalNotificationOptions" "$renewConfig" >/dev/null 2>&1 ; then
+	dialogNotificationOptions=$("$pBuddy" -c "Print :OptionalArguments:AdditionalNotificationOptions" "$renewConfig")
+else
+	dialogNotificationOptions="$defaultDialogNotificationOptions"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:NotificationSubtitle" "$renewConfig" >/dev/null 2>&1 ; then
+	subtitleOptions=$("$pBuddy" -c "Print :OptionalArguments:NotificationSubtitle" "$renewConfig")
+else
+	subtitleOptions="$defaultSubtitleOptions"
+fi
+
 if "$pBuddy" -c "Print :OptionalArguments:SecretQuitKey" "$renewConfig" >/dev/null 2>&1 ; then
 	secretQuitKey=$("$pBuddy" -c "Print :OptionalArguments:SecretQuitKey" "$renewConfig")
 else
 	secretQuitKey="$defaultSecretQuitKey"
+fi
+
+if [ -z "$subtitleOptions" ]; then
+	subtitleCommand=''
+else
+	subtitleCommand="--subtitle"
+fi
+
+if "$pBuddy" -c "Print :OptionalArguments:Deadline" "$renewConfig" >/dev/null 2>&1 ; then
+	deadline=$("$pBuddy" -c "Print :OptionalArguments:Deadline" "$renewConfig")
+else
+	deadline=''
 fi
 
 #Define what happens when Aggressive mode is engaged
@@ -473,7 +519,7 @@ log_message "Executing aggressive mode"
 #go aggro
 	check_assertions
 
-	"$dialogPath" -o \
+	"$dialogPath" \
 	--title "$dialogTitle" \
 	--button1text "$dialogNoDeferralsRemainingButtonText" \
 	--button1disabled \
@@ -504,7 +550,7 @@ log_message "Executing normal mode"
 #go normal
 	check_assertions
 
-	"$dialogPath" -o \
+	"$dialogPath" \
 	--title "$dialogTitle" \
 	--infobuttontext "$dialogRestartButtonText" \
 	--button1text "$dialogDeferralButtonText" \
@@ -514,7 +560,8 @@ log_message "Executing normal mode"
 	--messagealignment centre \
 	--quitkey "$secretQuitKey" \
 	$(echo $dialogAdditionalOptions) \
-	--message "$dialogNormalMessage $deferralsRemaining" \
+	$(echo $dialogNormalOptions) \
+	--message "$dialogNormalMessage" \
 
 	#Set exit code based on user input
 	dialogExitCode=$?
@@ -533,6 +580,9 @@ log_message "Executing notification mode"
 	--title "$dialogTitle" \
 	"$notificationIconCommand" "$notificationIcon" \
 	--message "$dialogNotificationMessage" \
+	$(echo $dialogAdditionalOptions) \
+	$(echo $dialogNotificationOptions) \
+	"$subtitleCommand" "$subtitleOptions"
 	
 	((notificationCount=notificationCount+1))
 	"$pBuddy" -c "Set :NotificationCount $notificationCount" "$userDeferralProfile"
@@ -555,7 +605,7 @@ function exec_deferral()
 	"$pBuddy" -c "Set :HumanReadableDeferDate $humanReadableDeferDate" "$userDeferralProfile"
 }
 
-#If the --dry-run flag is passed as a script argument for testing, then the reboot button doesn't actually reboot
+#If the --dry-run flag is given as a script argument for testing, then the reboot button doesn't actually reboot
 if [ "$dryRun" = 1 ]; then
 
 function exec_restart()
@@ -653,6 +703,26 @@ humanReadableDeferDate=$(date -j -f %s $deferUntil)
 
 ##################################################################
 #
+# This section processes disabled RequiredArguments
+#
+##################################################################
+
+#If the maximum deferrals is disabled, set it to an absurd value
+#This sets a practically infinite number of deferrals
+if [ "$maximumDeferrals" = '-1' ];then
+	maximumDeferrals='9999999999999'
+
+fi
+
+#If the notification threshold is disabled, set it to an absurd value
+#This enables Notification Only mode
+if [ "$notificationThreshold" = '-1' ];then
+	notificationThreshold='9999999999999'
+fi
+
+
+##################################################################
+#
 # This section processes command line arguments used for testing
 #
 ##################################################################
@@ -673,6 +743,7 @@ fi
 #Check if we're forcing aggro for testing
 if [ "$forceAggro" = 1 ]; then
 	uptime_days=$(( uptimeThreshold+1 ))
+	deadline='0'
 	currentDeferralCount=$(( maximumDeferrals+1 ))
 	activeDeferral=0
 	notificationCount=$((notificationThreshold+1))
@@ -695,6 +766,17 @@ if [ "$forceNotification" = 1 ]; then
 	exec_notification_mode
 fi
 
+#Check if we're forcing a deferral
+if [ -n "$forceDeferralMinutes" ]; then
+	deferUntilSeconds="$forceDeferral"
+	echo $current_unix_time
+	deferUntil=$((current_unix_time+deferUntilSeconds))
+	humanReadableDeferDate=$(date -j -f %s $deferUntil)
+	exec_deferral
+	exit 0
+fi
+
+
 ##################################################################
 #
 # This section has the primary logic that dictates the user experience
@@ -706,6 +788,13 @@ echo "$(date): Renew - Executing logic" >> "$logFile" || { echo "ERROR: Cannot w
 #Are we in a deferral time range? If so, exit quietly.
 if [ $activeDeferral -ge $current_unix_time ]; then
 	log_message "A deferral is active. Exiting."
+	exit 0
+fi
+
+#Is a Deadline set? If so, check and run logic.
+if [ -n "$deadline" ] && [ "$uptime_days" -ge "$uptimeThreshold" ]; then
+	debug_message "Deadline is past"
+	exec_aggro_mode
 	exit 0
 fi
 
@@ -726,7 +815,7 @@ if [ "$uptime_days" -ge "$uptimeThreshold" ]; then
 	fi
 	
 	#User has made a selection. Now we process it.
-	debug_message "DIALOG EXIT CODE: $dialgoExitCode."
+	debug_message "DIALOG EXIT CODE: $dialogExitCode."
 
 	if [[ "$dialogExitCode" = 0 ]]; then
 		log_message "USER ACTION: User chose deferral."
