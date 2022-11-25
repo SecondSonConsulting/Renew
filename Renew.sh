@@ -80,7 +80,7 @@ userDeferralProfile="$userHomeFolder/Library/Preferences/com.secondsonconsulting
 
 #This is up top so that it runs even if no validation succeeds.
 if [ "$1" = "--version" ]; then
-	log_message "--version argument passed. Printing version information and exiting."
+	log_message "--version argument detected. Printing version information and exiting."
 	echo "Renew.sh version: $scriptVersion"
 	echo "SwiftDialog Version: $($dialogPath --version)"
 	exit 0
@@ -200,7 +200,7 @@ elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	help_message
 	exit 0
 elif [ "$1" = "" ]; then
-	debug_message "No testing arguments passed during execution."
+	debug_message "No testing arguments detected during execution."
 else
 	debug_message "ERROR: Invalid arguments given. Printing help message and exiting."
 	help_message
@@ -337,7 +337,7 @@ case "$languageChoice" in
         ##English is the default and fallback language
 		#Define script default messaging ENGLISH
 		defaultDialogTitle="Please Restart"
-		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible.**"
+		defaultDialogNormalMessage="In order to keep your system healthy and secure it needs to be restarted.  \n**Please save your work** and restart as soon as possible."
 		defaultDialogAggroMessage="**Please save your work and restart**"
 		defaultDialogNotificationMessage="In order to keep your system healthy and secure it needs to be restarted.  \nPlease save your work and restart as soon as possible."
 		defaultRestartButtonText="OK, Restart Now I am Ready"
@@ -605,7 +605,7 @@ function exec_deferral()
 	"$pBuddy" -c "Set :HumanReadableDeferDate $humanReadableDeferDate" "$userDeferralProfile"
 }
 
-#If the --dry-run flag is passed as a script argument for testing, then the reboot button doesn't actually reboot
+#If the --dry-run flag is given as a script argument for testing, then the reboot button doesn't actually reboot
 if [ "$dryRun" = 1 ]; then
 
 function exec_restart()
@@ -766,7 +766,6 @@ if [ "$forceNotification" = 1 ]; then
 	exec_notification_mode
 fi
 
-echo "***FORCEDEFERRAL LOGIC"
 #Check if we're forcing a deferral
 if [ -n "$forceDeferralMinutes" ]; then
 	deferUntilSeconds="$forceDeferral"
