@@ -1,0 +1,141 @@
+{
+    "title": "Renew (com.secondsonconsulting.renew)",
+    "description": "Renew Configuration",
+    "properties": {
+        "RequiredArguments": {
+            "type": "object",
+            "title": "Required Arguments",
+            "description": "There are four required arguments to make a valid Renew configuration.",
+            "properties": {
+                "MaximumDeferrals": {
+                    "type": "integer",
+                    "title": "Maximum number of deferrals"
+                },
+                "UptimeThreshold": {
+                    "type": "integer",
+                    "title": "Uptime Threshold",
+                    "description": "How many days uptime do you want before Renew begins to take action?"
+                },
+                "NotificationThreshold": {
+                    "type": "integer",
+                    "title": "Notification Threshold",
+                    "description": "How many notifications before changing to Normal Mode?"
+                },
+                "DeferralDuration": {
+                    "type": "integer",
+                    "title": "Deferral Duration",
+                    "description": "How many hours is a deferral?"
+                }
+            },
+            "property_order": 5
+        },
+        "OptionalArguments": {
+            "type": "object",
+            "title": "Optional Arguments",
+            "description": "There are a number of optional arguments to change Renew to look and act how you want.",
+            "properties": {
+                "Title": {
+                    "type": "string",
+                    "title": "Title",
+                    "description": "Maps to the swiftDialog option: --title"
+                },
+                "AggroMessage": {
+                    "type": "string",
+                    "title": "Aggressive Message",
+                    "description": "The message body you want in your Aggressive Mode dialog windows. SwiftDialog option: --message"
+                },
+                "NotificationMessage": {
+                    "type": "string",
+                    "title": "Notification Message",
+                    "description": "The message body you want in your Notification Center alerts. Maps to SwiftDialog option: --message"
+                },
+                "NotificationSubtitle": {
+                    "type": "string",
+                    "title": "Notification Subtitle",
+                    "description": "Maps to SwiftDialog option: --subtitle"
+                },
+                "DeferralButtonText": {
+                    "type": "string",
+                    "title": "Deferral Button Text",
+                    "description": "What do you want your deferral button to say? Maps to SwiftDialog option: --button1text"
+                },
+                "NoDeferralsRemainingButtonText": {
+                    "type": "string",
+                    "title": "\"No Deferrals Remaining\" Button Text",
+                    "description": ">What do you want your deferral button to say when it's greyed out in Aggressive Mode? Maps to SwiftDialog option: --button1text"
+                },
+                "RestartButtonText": {
+                    "type": "string",
+                    "title": "Restart Button Text",
+                    "description": "What do you want your \"Restart Now\" button to say? Maps to SwiftDialog option: --infobuttontext"
+                },
+                "ShowDeferralCount": {
+                    "type": "boolean",
+                    "title": "Show Deferral Count",
+                    "description": "If true, an additional sentence is added to your Normal Mode dialog windows indicating how many deferrals the user has remaining. Omit this key if you don't want the extra information."
+                },
+                "NotificationIcon": {
+                    "type": "string",
+                    "title": "Notification Icon",
+                    "description": "This is the icon included on the right side of the Dialog Notification. Maps to SwiftDialog option: --icon"
+                },
+                "NotificationIconDarkMode": {
+                    "type": "string",
+                    "title": "Notification Icon DarkMode",
+                    "description": "This is the icon included on the right side of the Dialog Notification. Use this key if you have to differentiate between light and dark mode icons. Maps to SwiftDialog option: --icon"
+                },
+                "MessageIcon": {
+                    "type": "string",
+                    "title": "Message Icon",
+                    "description": "The icon used in your Normal and Aggressive Mode dialogs. Use \"none\" to disable.  Maps to SwiftDialog option: --icon"
+                },
+                "MessageIconDarkMode": {
+                    "type": "string",
+                    "title": "Message Icon Dark Mode",
+                    "description": "The icon used in your Normal and Aggressive Mode dialogs. Use this key if you have to differentiate between light and dark mode icons. Maps to SwiftDialog option: --icon"
+                },
+                "BannerImage": {
+                    "type": "string",
+                    "title": "Banner Image",
+                    "description": "Use this key to designate a Banner Image for your Normal and Aggressive Mode dialog windows. Maps to SwiftDialog option: --bannerimage"
+                },
+                "BannerImageDarkMode": {
+                    "type": "string",
+                    "title": "Banner Image Dark Mode",
+                    "description": "Use this key to designate a Banner Image for your Normal and Aggressive Mode dialog windows.  Use this key if you have to differentiate between light and dark mode banners. Maps to SwiftDialog option: --bannerimage"
+                },
+                "AdditionalDialogOptions": {
+                    "type": "string",
+                    "title": "Additional Dialog Options",
+                    "description": "Use this key to pass additional options you want for all dialog events. See SwiftDialog documentation for what you can do."
+                },
+                "AdditionalAggressiveOptions": {
+                    "type": "string",
+                    "title": "Additional Aggressive Mode Options",
+                    "description": "Use this key to pass additional options you want for only Aggressive Mode dialog events. See SwiftDialog documentation for what you can do."
+                },
+                "AdditionalNormalOptions": {
+                    "type": "string",
+                    "title": "Additional Normal Options",
+                    "description": "Use this key to pass additional options you want for only Normal Mode dialog events. See SwiftDialog documentation for what you can do."
+                },
+                "AdditionalNotificationOptions": {
+                    "type": "string",
+                    "title": "Additional Notification Options",
+                    "description": "Use this key to pass additional options you want for only Notification Mode dialog events. See SwiftDialog documentation for what you can do."
+                },
+                "Deadline": {
+                    "type": "integer",
+                    "title": "Deadline",
+                    "description": "Use this option to enable \"Deadline\" mode. If a device's uptime exceeds the \"Deadline\" value in days, Renew will enter Aggressive Mode regardless of the remaining deferrals."
+                },
+                "SecretQuitKey": {
+                    "type": "string",
+                    "title": "Secret Quit Key",
+                    "description": "This key in combination with the \"Command\" key will allow you to quit a dialog window without restarting. Cannot be set to Q! Omit this to leave the default combination (Cmd+])"
+                }
+            },
+            "property_order": 10
+        }
+    }
+}
