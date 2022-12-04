@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 #set -x
 
 #Set variables for path/name
@@ -19,5 +19,9 @@ then
 else
 	#Load the launch d
 	launchctl asuser "${currentUserUID}" launchctl load -w "$launchDPath"/"$launchDName".plist > /dev/null 2>&1
-	launchDResult=$(echo $?)
+	launchDResult=$?
+	#Uncomment below for debugging
+	#echo "LaunchD Result: $launchDResult"
 fi
+
+exit "$launchDResult"
