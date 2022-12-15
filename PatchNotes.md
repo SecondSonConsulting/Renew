@@ -1,5 +1,5 @@
 ### Renew.sh v0.1.11 - Patch Notes
-- Fixed a bug that could affect the "restart now" button in Deadline mode or --force-aggro mode
+- Fixed a bug that could affect the "restart now" button behavior in Deadline mode or --force-aggro mode
 - Minor code cleanup
 
 ### Renew.sh v0.1.10 - Patch Notes
