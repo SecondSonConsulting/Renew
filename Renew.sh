@@ -2,7 +2,7 @@
 #set -x
 
 ##Renew.sh
-scriptVersion="Beta 0.1.10"
+scriptVersion="Beta 0.1.11"
 
 #Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 
@@ -636,6 +636,27 @@ assertionsToIgnore+="obs"
 assertionsToIgnore+="Amphetamine"
 assertionsToIgnore+="caffeinate"
 
+function process_user_selection()
+{
+	#User has made a selection. Now we process it.
+	debug_message "DIALOG EXIT CODE: $dialogExitCode."
+
+	if [[ "$dialogExitCode" = 0 ]]; then
+		log_message "USER ACTION: User chose deferral."
+		exec_deferral
+	elif [[ "$dialogExitCode" = 10 ]]; then
+		log_message "USER ACTION: User pressed the secret quit button."
+		exit $dialogExitCode
+	elif [[ "$dialogExitCode" = 3 ]]; then
+		log_message "USER ACTION: User chose to restart now."
+		exec_restart
+	else
+		log_message "USER ACTION: Dialog exited with an unexpected code. Possibly it was killed unexpectedly."
+		exit $dialogExitCode
+	fi
+
+}
+
 function check_assertions()
 {
 ##Thank you @Pico for the commands to check for the screen being awake and unlocked
@@ -698,7 +719,7 @@ debug_message "Uptime values are: $uptime_days days = $uptime_hours hours = $upt
 deferUntilSeconds=$((deferralDuration * 60 * 60 - 300))
 deferUntil=$((current_unix_time+deferUntilSeconds))
 
-debug_message "Defer Until: "$deferUntil" which is $(date -j -f %s $deferUntil)"
+debug_message "Defer Until: $deferUntil which is $(date -j -f %s $deferUntil)"
 humanReadableDeferDate=$(date -j -f %s $deferUntil)
 
 ##################################################################
@@ -719,7 +740,6 @@ fi
 if [ "$notificationThreshold" = '-1' ];then
 	notificationThreshold='9999999999999'
 fi
-
 
 ##################################################################
 #
@@ -776,7 +796,6 @@ if [ -n "$forceDeferralMinutes" ]; then
 	exit 0
 fi
 
-
 ##################################################################
 #
 # This section has the primary logic that dictates the user experience
@@ -795,6 +814,7 @@ fi
 if [ -n "$deadline" ] && [ "$uptime_days" -ge "$uptimeThreshold" ]; then
 	debug_message "Deadline is past"
 	exec_aggro_mode
+	process_user_selection
 	exit 0
 fi
 
@@ -813,23 +833,7 @@ if [ "$uptime_days" -ge "$uptimeThreshold" ]; then
 		debug_message "Normal mode conditions met."
 		exec_normal_mode
 	fi
-	
-	#User has made a selection. Now we process it.
-	debug_message "DIALOG EXIT CODE: $dialogExitCode."
-
-	if [[ "$dialogExitCode" = 0 ]]; then
-		log_message "USER ACTION: User chose deferral."
-		exec_deferral
-	elif [[ "$dialogExitCode" = 10 ]]; then
-		log_message "USER ACTION: User pressed the secret quit button."
-		exit $dialogExitCode
-	elif [[ "$dialogExitCode" = 3 ]]; then
-		log_message "USER ACTION: User chose to restart now."
-		exec_restart
-	else
-		log_message "USER ACTION: Dialog exited with an unexpected code. Possibly it was killed unexpectedly."
-		exit $dialogExitCode
-	fi
+	process_user_selection
 else
 	#No enforcement needed, so we set deferrals to zero
 	log_message "Device does not need to be restarted."
