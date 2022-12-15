@@ -1,3 +1,7 @@
+### Renew.sh v0.1.11 - Patch Notes
+- Fixed a bug that could affect the "restart now" button in Deadline mode or --force-aggro mode
+- Minor code cleanup
+
 ### Renew.sh v0.1.10 - Patch Notes
 - This release, and all future releases, will now be Signed, Notarized, and Stapled with: "Developer ID Installer: Second Son Consulting Inc. (7Q6XP5698G)"
 - This release, and all future releases, will include an alternate pkg which has no LaunchAgent, and no pre or post-install scripts. If you're using your own customized timing mechanism you can safely run the `Renew_v.x_NoAgent.pkg` package and not overwrite your own changes.
