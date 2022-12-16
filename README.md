@@ -10,10 +10,13 @@ Renew runs as the logged in user and will never restart a computer without a use
 Regularly restarting your workstation is an important part of keeping it running healthy and secure. Application updates, MDM commands, and security software will run more efficiently when the computer is allowed to restart on a regular basis. We have found that 10-14 day restarts are ideal to keeping things working as expected.
 
 ## Dependencies
-macOS 11+ is required
-Swift Dialog - (v.2.0 or newer required for notification center features) https://github.com/bartreardon/swiftDialog
-A configuration profile (either locally installed mobileconfig or delivered via MDM)
-A means to initiate the script (typically a LaunchAgent)
+- macOS 11+
+
+- Swift Dialog - (v.2.0 or newer required for notification center features) https://github.com/bartreardon/swiftDialog
+
+- A configuration profile (either locally installed mobileconfig or delivered via MDM)
+
+- A means to initiate the script (typically a LaunchAgent)
 
 ## Screenshots
 ### Notification Mode Default User Experience
