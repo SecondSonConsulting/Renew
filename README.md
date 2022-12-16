@@ -15,12 +15,6 @@ Swift Dialog - (v.2.0 or newer required for notification center features) https:
 A configuration profile (either locally installed mobileconfig or delivered via MDM)
 A means to initiate the script (typically a LaunchAgent)
 
-Swift Dialog - (v.2.0 or newer required for notification center features) https://github.com/bartreardon/swiftDialog
-
-A configuration profile (either locally installed mobileconfig or delivered via MDM)
-
-A means to initiate the script (typically a LaunchAgent)
-
 ## Screenshots
 ### Notification Mode Default User Experience
 ![Renew Notification Example Image](https://github.com/SecondSonConsulting/Renew/blob/main/Example%20Screenshots/Renew-NotificationDefault.png?raw=true#gh-light-mode-only)
