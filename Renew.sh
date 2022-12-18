@@ -14,7 +14,7 @@ scriptVersion="Beta 0.1.12"
 function check_not_root()
 {
 
-# check we are running as root
+# check we are NOT running as root
 if [[ $(id -u) = 0 ]]; then
   echo "ERROR: This script should never be run as root **EXITING**"
   exit 1
