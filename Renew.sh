@@ -2,7 +2,7 @@
 #set -x
 
 ##Renew.sh
-scriptVersion="Beta 0.1.11"
+scriptVersion="Beta 0.1.12"
 
 #Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 
@@ -11,6 +11,17 @@ scriptVersion="Beta 0.1.11"
 # This section sets up the basic variables, functions, and validation
 #
 ##################################################################
+function check_not_root()
+{
+
+# check we are running as root
+if [[ $(id -u) = 0 ]]; then
+  echo "ERROR: This script should never be run as root **EXITING**"
+  exit 1
+fi
+}
+
+check_not_root
 
 ##Current user/home used to set the deferral plist
 ##Each user on a system will have its own deferral count and log
