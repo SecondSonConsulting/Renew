@@ -9,6 +9,7 @@
 - Alternate package does not include a Launch Agent. Configure your own custom scheduling to suit your needs
 - [Visit the wiki](https://github.com/SecondSonConsulting/Renew/wiki) for detailed documentation and deployment scenarios
 - Default language support for 5 languages (and will add more upon submission)
+- Ask questions or get community support in the #renew channel on the Mac Admins Slack
 
 ### Renew.sh v0.1.12 - Patch Notes
 - Added a check to verify the script is not running as root. If run as root, the script now bails. This should prevent issues with users having their Deferrals Profile inaccessible when running as user.
