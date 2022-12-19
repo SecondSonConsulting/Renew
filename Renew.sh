@@ -2,7 +2,7 @@
 #set -x
 
 ##Renew.sh
-scriptVersion="1.0"
+scriptVersion="1.0.1"
 
 #Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 
@@ -822,7 +822,7 @@ if [ $activeDeferral -ge $current_unix_time ]; then
 fi
 
 #Is a Deadline set? If so, check and run logic.
-if [ -n "$deadline" ] && [ "$uptime_days" -ge "$uptimeThreshold" ]; then
+if [ -n "$deadline" ] && [ "$uptime_days" -ge "$deadline" ]; then
 	debug_message "Deadline is past"
 	exec_aggro_mode
 	process_user_selection
