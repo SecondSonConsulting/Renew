@@ -335,12 +335,12 @@ case "$languageChoice" in
    ;;
    de)
 		#Define script default messaging DEUTSCH
-       defaultDialogTitle="Bitte führen Sie einen Neustart durch"
-       defaultDialogNormalMessage="Um die Stabilität und Sicherheit Ihres Systems zu gewährleisten, ist ein Neustart erforderlich \n**Bitte speichern Sie Ihre Arbeit** und starten Sie Ihren Computer neu sobald als möglich."
-       defaultDialogAggroMessage="**Bitte speichern Sie Ihre Arbeit und starten neu**"
-       defaultDialogNotificationMessage="Um die Stabilität und Sicherheit Ihres Systems zu gewährleisten, ist ein Neustart erforderlich \nBitte speichern Sie Ihre Arbeit und starten Sie Ihren Computer neu sobald als möglich. "
-       defaultRestartButtonText="OK,, ich bin fertig, bitte starten Sie neu"
-       defaultDeferralButtonText="Nicht jetzt, bitte erinnern Sie mich später"
+       defaultDialogTitle="Bitte führe einen Neustart durch"
+       defaultDialogNormalMessage="Um die Stabilität und Sicherheit deines Systems zu gewährleisten, ist ein Neustart erforderlich \n**Bitte speichere deine Arbeit** und starte deinen Computer neu sobald möglich."
+       defaultDialogAggroMessage="**Bitte speichere deine Arbeit und starte neu**"
+       defaultDialogNotificationMessage="Um die Stabilität und Sicherheit deines Systems zu gewährleisten, ist ein Neustart erforderlich \nBitte speichere deine Arbeit und starte deinen Computer neu sobald möglich. "
+       defaultRestartButtonText="OK,, ich bin fertig, bitte starten neustarten"
+       defaultDeferralButtonText="Nicht jetzt, bitte erinnere mich später"
        defaultNoDeferralsRemainingButtonText="Keine weitere Aufschiebung möglich"
 		defaultDeferralMessage="Deferrals remaining until required restart: "
    ;;
