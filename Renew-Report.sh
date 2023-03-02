@@ -5,7 +5,7 @@
 
 # This script is meant to be run from a management tool.
 # It will report information regarding active deferrals 
-# and willread the last X lines of the Renew log for the 
+# and will read the last X lines of the Renew log for the 
 # currently logged in user.
 
 # Set the number of lines you want to read from the log. 10 should be sufficient for testing
