@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 # Renew Report v1.0
 # Trevor Sysock aka Big Mac Admin
@@ -17,9 +18,9 @@ currentUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { p
 # Current User home folder
 userHomeFolder=$(dscl . -read /users/${currentUser} NFSHomeDirectory | cut -d " " -f 2)
 
-renewLogFile="$userHomeFolder"/Library/"Application Support"/Renew/Renew.log
+renewLogFile="${userHomeFolder}/Library/Application Support/Renew/Renew.log"
 
-renewUserDeferrals="$userHomeFolder"/Library/Preferences/com.secondsonconsulting.renew.user.plist
+renewUserDeferrals="${userHomeFolder}/Library/Preferences/com.secondsonconsulting.renew.user.plist"
 
 echo "Reading details for user: $currentUser"
 
