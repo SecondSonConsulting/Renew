@@ -11,6 +11,50 @@ scriptVersion="1.0.2"
 # This section sets up the basic variables, functions, and validation
 #
 ##################################################################
+#This is the help dialog explaining the options and how to use
+help_message()
+{
+cat <<HELPMESSAGE
+NAME
+	/usr/local/Renew.sh
+
+SYNOPSIS
+	/usr/local/Renew.sh [ --reset | --dry-run | --force-aggro | --force-normal | --force-notification | --help ]
+	
+DESCRIPTION
+	The Renew script is designed to be run on regular intervals (about every 30 minutes, typically via a Global Launch Agent).
+	In normal usage, no additional arguments are required. The Options below are primarily for testing.
+	
+	Multiple options are not supported, only one option can be chosen at a time.
+
+OPTIONS
+	--reset					This will reset the user's deferral profile to reset the Renew experience
+
+	--dry-run				Disables the restart/quit functionality of the "Restart" button for testing purposes.
+  				  			Also ignores active deferral count and sets uptime to ensure an event is triggered.
+
+	--force-aggro			Aggressive mode will be executed regardless of deferrals or uptime.
+
+	--force-normal			Normal mode will be executed regardless of deferrals or uptime.
+
+	--force-notification	Notification mode will be executed regardless of deferrals or uptime.
+
+	--version				Print the version of Renew and Dialog and exit.
+	
+	--help					Print this help message and exit.
+
+EXIT CODES
+	0						Successful exit
+	1						Unknown or undefined error
+	2						Permissions or home folder issue
+	3						SwiftDialog binary missing
+	4						Invalid arguments given at command line
+	*						Other undefined exit codes are most likely passed from SwiftDialog exiting improperly
+
+HELPMESSAGE
+
+}
+
 function check_not_root()
 {
 
@@ -97,6 +141,12 @@ if [ "$1" = "--version" ]; then
 	exit 0
 fi
 
+if [ "$1" = "--help" ]; then
+	log_message "--help argument detected."
+	help_message
+	exit 0
+fi
+
 #Exit if there is no mobileconfig payload
 if [ ! -f "$renewConfig" ]; then
 	log_message "Configuration profile missing. Exiting."
@@ -118,49 +168,6 @@ else
 	exit 2
 fi
 
-#This is the help dialog explaining the options and how to use
-help_message()
-{
-cat <<HELPMESSAGE
-NAME
-	/usr/local/Renew.sh
-
-SYNOPSIS
-	/usr/local/Renew.sh [ --reset | --dry-run | --force-aggro | --force-normal | --force-notification | --help ]
-	
-DESCRIPTION
-	The Renew script is designed to be run on regular intervals (about every 30 minutes, typically via a Global Launch Agent).
-	In normal usage, no additional arguments are required. The Options below are primarily for testing.
-	
-	Multiple options are not supported, only one option can be chosen at a time.
-
-OPTIONS
-	--reset					This will reset the user's deferral profile to reset the Renew experience
-
-	--dry-run				Disables the restart/quit functionality of the "Restart" button for testing purposes.
-  				  			Also ignores active deferral count and sets uptime to ensure an event is triggered.
-
-	--force-aggro			Aggressive mode will be executed regardless of deferrals or uptime.
-
-	--force-normal			Normal mode will be executed regardless of deferrals or uptime.
-
-	--force-notification	Notification mode will be executed regardless of deferrals or uptime.
-
-	--version				Print the version of Renew and Dialog and exit.
-	
-	--help					Print this help message and exit.
-
-EXIT CODES
-	0						Successful exit
-	1						Unknown or undefined error
-	2						Permissions or home folder issue
-	3						SwiftDialog binary missing
-	4						Invalid arguments given at command line
-	*						Other undefined exit codes are most likely passed from SwiftDialog exiting improperly
-
-HELPMESSAGE
-
-}
 
 ##################################################################
 #
@@ -205,10 +212,6 @@ elif [ "$1" = "--defer" ]; then
 elif [ "$1" = "--reset" ]; then
 	log_message "--reset used. Resetting deferral profile and exiting."
 	reset_deferral_profile
-	exit 0
-elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-	debug_message "--help used. Printing help message and exiting."
-	help_message
 	exit 0
 elif [ "$1" = "" ]; then
 	debug_message "No testing arguments detected during execution."
@@ -670,21 +673,14 @@ function process_user_selection()
 
 function check_assertions()
 {
-##Thank you @Pico for the commands to check for the screen being awake and unlocked
-#Check if the screen is asleep. Exit quietly without a deferral if it s not awake.
-if [[ "$(osascript -l 'JavaScript' -e 'ObjC.import("CoreGraphics"); $.CGDisplayIsActive($.CGMainDisplayID())')" == '1' ]]; then
-    debug_message "Screen is awake"
+# Check if the user has been idle for 15+ minutes
+idleThreshold="10"
+idleTime=$(/usr/sbin/ioreg -c IOHIDSystem | /usr/bin/awk '/HIDIdleTime/ {print int($NF/1000000000); exit}')
+if [ $idleTime -gt $idleThreshold ] ;then
+    log_message "User is idle. Exiting."
+	exit 0
 else
-    log_message "Screen is asleep. Exiting without event or deferral."
-    exit 0
-fi
-
-#Check if the screen is locked. Exit quietly without a deferral if it s not unlocked.
-if [[ "$(/usr/libexec/PlistBuddy -c "Print :IOConsoleUsers:0:CGSSessionScreenIsLocked" /dev/stdin <<< "$(ioreg -ac IORegistryEntry -k IOConsoleUsers -d 1)" 2> /dev/null)" != 'true' ]]; then
-    debug_message "Screen is unlocked"
-else
-    log_message "Screen is locked. Exiting without event or deferral."
-    exit 0
+    log_message "User is active. Idle time: $idleTime"
 fi
 
 #Check for active screen assertions. If an application is preventing the screen from sleeping, we don't notify. It typically means user is in a video meeting or watching a video.
