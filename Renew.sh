@@ -149,6 +149,7 @@ fi
 #Exit if there is no mobileconfig payload
 if [ ! -f "$renewConfig" ]; then
 	log_message "Configuration profile missing. Exiting."
+	echo "Configuration profile missing. Exiting."
 	exit 0
 fi
 
