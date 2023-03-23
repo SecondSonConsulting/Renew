@@ -148,6 +148,12 @@ elif [ "$1" = "" ]; then
 	debug_message "No testing arguments detected during execution."
 fi
 
+if [ "$1" = "--help" ]; then
+	log_message "--help argument detected."
+	help_message
+	exit 0
+fi
+
 #Exit if there is no mobileconfig payload
 if [ ! -f "$renewConfig" ]; then
 	log_message "Configuration profile missing. Exiting."
@@ -214,6 +220,10 @@ elif [ "$1" = "--reset" ]; then
 	log_message "--reset used. Resetting deferral profile and exiting."
 	reset_deferral_profile
 	exit 0
+
+elif [ "$1" = "" ]; then
+	debug_message "No testing arguments detected during execution."
+
 else
 	debug_message "ERROR: Invalid arguments given. Printing help message and exiting."
 	help_message
@@ -672,21 +682,14 @@ function process_user_selection()
 
 function check_assertions()
 {
-##Thank you @Pico for the commands to check for the screen being awake and unlocked
-#Check if the screen is asleep. Exit quietly without a deferral if it s not awake.
-if [[ "$(osascript -l 'JavaScript' -e 'ObjC.import("CoreGraphics"); $.CGDisplayIsActive($.CGMainDisplayID())')" == '1' ]]; then
-    debug_message "Screen is awake"
+# Check if the user has been idle for 15+ minutes
+idleThreshold="10"
+idleTime=$(/usr/sbin/ioreg -c IOHIDSystem | /usr/bin/awk '/HIDIdleTime/ {print int($NF/1000000000); exit}')
+if [ $idleTime -gt $idleThreshold ] ;then
+    log_message "User is idle. Exiting."
+	exit 0
 else
-    log_message "Screen is asleep. Exiting without event or deferral."
-    exit 0
-fi
-
-#Check if the screen is locked. Exit quietly without a deferral if it s not unlocked.
-if [[ "$(/usr/libexec/PlistBuddy -c "Print :IOConsoleUsers:0:CGSSessionScreenIsLocked" /dev/stdin <<< "$(ioreg -ac IORegistryEntry -k IOConsoleUsers -d 1)" 2> /dev/null)" != 'true' ]]; then
-    debug_message "Screen is unlocked"
-else
-    log_message "Screen is locked. Exiting without event or deferral."
-    exit 0
+    log_message "User is active. Idle time: $idleTime"
 fi
 
 #Check for active screen assertions. If an application is preventing the screen from sleeping, we don't notify. It typically means user is in a video meeting or watching a video.

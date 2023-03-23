@@ -1,3 +1,12 @@
+### Renew.sh v1.0.2 - Patch Notes
+- German language update ###THANKS HERE###
+- Removed "screen locked" and "screen sleeping" in favor of user idle time. If a user has been idle for more than 15 minutes, Renew will exit.
+- Changed order of operations so that `--help` will print help dialog even if no configuration file is present.
+- Removed Jamf Json Schema file from repo. Since Renew is now part of the ProfileManifest official repository, the json schema is mirrored [here](https://github.com/Jamf-Custom-Profile-Schemas/ProfileManifestsMirror/tree/main/manifests/ManagedPreferencesApplications).
+
+### Renew.sh v1.0.1 - Patch Notes
+- Fixed a calculation bug with the `Deadline` feature
+
 ### Renew.sh v1.0 - Patch Notes
 - First production release!
 - Gently (or not so much) urge your users to restart their computers on a regular basis

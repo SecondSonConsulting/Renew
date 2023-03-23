@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadDisplayName</key>
+			<string>renew</string>
+			<key>PayloadIdentifier</key>
+			<string>com.secondsonconsulting.renew.5A990D16-50BF-4F03-91DD-CD435C86DF1E</string>
+			<key>PayloadType</key>
+			<string>com.secondsonconsulting.renew</string>
+			<key>PayloadUUID</key>
+			<string>5A990D16-50BF-4F03-91DD-CD435C86DF1E</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>RequiredArguments</key>
+			<dict>
+				<key>MaximumDeferrals</key>
+				<integer>-1</integer>
+				<key>UptimeThreshold</key>
+				<integer>0</integer>
+				<key>NotificationThreshold</key>
+				<integer>-1</integer>
+				<key>DeferralDuration</key>
+				<integer>8</integer>
+			</dict>
+			<key>OptionalArguments</key>
+			<dict>
+			<key>MessageIcon</key>
+			<string>/Library/Application Support/SecondSon/SSC-Logo-TransparentBackground_Squared.png</string>
+			<key>AggroMessage</key>
+			<string>Your device has been not been restarted for over 21 days. \n\n**Please save your work and restart.**</string>
+			<key>AdditionalDialogOptions</key>
+			<string>--width 300 --height 360 --messagefont size=15 --position topright --ontop --messagealignment centre --moveable</string>
+			<key>RestartButtonText</key>
+			<string>Restart Now</string>
+			<key>DeferralButtonText</key>
+			<string>Later...</string>
+			<key>NoDeferralsRemainingButtonText</key>
+			<string>Later...</string>
+			<key>Deadline</key>
+			<integer>21</integer>
+			</dict>
+		</dict>
+	</array>
+	<key>PayloadDisplayName</key>
+	<string>Renew Configuration</string>
+	<key>PayloadIdentifier</key>
+	<string>SecondSon.E37B3EC4-7BB2-4717-8627-02F002162FDB</string>
+	<key>PayloadScope</key>
+	<string>System</string>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>E37B3EC4-7BB2-4717-8627-02F002162FDB</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>
