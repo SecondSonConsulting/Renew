@@ -44,6 +44,11 @@
                     "title": "Aggressive Message",
                     "description": "The message body you want in your Aggressive Mode dialog windows. SwiftDialog option: --message"
                 },
+                "NormalMessage": {
+                    "type": "string",
+                    "title": "Normal Message",
+                    "description": "The message body you want in your Normal Mode dialog windows. SwiftDialog option: --message"
+                },
                 "NotificationMessage": {
                     "type": "string",
                     "title": "Notification Message",
