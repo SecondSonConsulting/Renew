@@ -44,7 +44,7 @@ renewUserDeferrals="${userHomeFolder}/Library/Preferences/com.secondsonconsultin
 #echo "****************************************************"&#13;
 #echo ""&#13;
 &#13;
-#currently this prints out a single line, if you wanted to use date logic you would have to cut the date fields into their its own var &#13;
+#currently this prints out a single line containing both the date of last run and status, if you wanted to use date logic you would have to cut the date fields into its own var &#13;
 if [ -f "$renewLogFile" ]; then&#13;
     tailVar=$(tail -n $lineCount "$renewLogFile")&#13;
 	echo "&lt;result&gt;${tailVar}&lt;/result&gt;"&#13;
