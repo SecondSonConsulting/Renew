@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><extensionAttribute>
+<displayName>Renew Status</displayName>
+<description/>
+<dataType>string</dataType>
+<scriptContentsMac>#!/bin/zsh&#13;
+&#13;
+#this turns on verbose debugging, choose your own adventure &#13;
+#set -x&#13;
+&#13;
+# Renew Report v1.0&#13;
+# Trevor Sysock aka Big Mac Admin&#13;
+# Modified for JAMF by Michael Z aka Michael Zukrow &#13;
+#check the shell script in the top level folder to see the original script&#13;
+&#13;
+&#13;
+# This script is meant to be run from a management tool, it has been configured for JAMF&#13;
+# It will report information regarding active deferrals &#13;
+# and will read the last X lines of the Renew log for the &#13;
+# currently logged in user.&#13;
+&#13;
+# Set the number of lines you want to read from the log. 10 should be sufficient for testing, for JAMF EA you most likely only care about the last line &#13;
+lineCount='1'&#13;
+&#13;
+# Get the currently logged in user&#13;
+currentUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )&#13;
+&#13;
+# Current User home folder&#13;
+userHomeFolder=$(dscl . -read /users/${currentUser} NFSHomeDirectory | cut -d " " -f 2)&#13;
+&#13;
+renewLogFile="${userHomeFolder}/Library/Application Support/Renew/Renew.log"&#13;
+&#13;
+renewUserDeferrals="${userHomeFolder}/Library/Preferences/com.secondsonconsulting.renew.user.plist"&#13;
+&#13;
+#echo "Reading details for user: $currentUser"&#13;
+#this only matters on multiuser machines and if you are triggering outside check in, most likely can leave as is&#13;
+&#13;
+#if [ -f "$renewUserDeferrals" ]; then&#13;
+#    /usr/libexec/PlistBuddy -c "Print" "&lt;result&gt;${renewUserDeferrals}&lt;/result&gt;"&#13;
+#else&#13;
+#    echo "&lt;result&gt;No user deferral file found&lt;/result&gt;"&#13;
+#fi&#13;
+&#13;
+#echo ""&#13;
+#echo "****************************************************"&#13;
+#echo ""&#13;
+&#13;
+#currently this prints out a single line, if you wanted to use date logic you would have to cut the date fields into their its own var &#13;
+if [ -f "$renewLogFile" ]; then&#13;
+    tailVar=$(tail -n $lineCount "$renewLogFile")&#13;
+	echo "&lt;result&gt;${tailVar}&lt;/result&gt;"&#13;
+else&#13;
+    echo "&lt;result&gt;No Renew log files found&lt;/result&gt;"&#13;
+fi</scriptContentsMac>
+</extensionAttribute>
