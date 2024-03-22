@@ -78,7 +78,8 @@ if [ "$logLength" -ge 3000 ]; then
 fi
 
 #Path to mobileconfig payload
-renewConfig="/Library/Managed Preferences/com.secondsonconsulting.renew.plist"
+#renewConfig="/Library/Managed Preferences/com.secondsonconsulting.renew.plist"
+renewConfig="/private/var/tmp/com.secondsonconsulting.renew.plist"
 
 #Path to swiftDialog binary
 dialogPath='/usr/local/bin/dialog'
@@ -643,6 +644,15 @@ fi
 
 #By default, we wnat to ignore some specific app assertions (caffeinate, Amphetamine, obs). These aren't actual indicators of what we're looking for.
 assertionsToIgnore=()
+
+#If the admin has set any items in the config add them to assertionsToIgnore
+count=0
+until ! "$pBuddy" -c "Print :OptionalArguments:IgnoreAssertions:$count" $renewConfig > /dev/null 2>&1; do
+    assertionsToIgnore+=$("$pBuddy" -c "Print :OptionalArguments:IgnoreAssertions:$count" $renewConfig)
+    count=$(( count + 1 ))
+done
+
+#Default Ignore List
 assertionsToIgnore+="obs"
 assertionsToIgnore+="Amphetamine"
 assertionsToIgnore+="caffeinate"
