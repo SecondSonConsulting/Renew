@@ -78,7 +78,16 @@ if [ "$logLength" -ge 3000 ]; then
 fi
 
 #Path to mobileconfig payload
-renewConfig="/Library/Managed Preferences/com.secondsonconsulting.renew.plist"
+managedConfig="/Library/Managed Preferences/com.secondsonconsulting.renew.plist"
+localConfig="/Library/Preferences/com.secondsonconsulting.renew.plist"
+
+if [ -f "$managedConfig" ]; then
+    renewConfig="$managedConfig"
+else
+    renewConfig="$localConfig"
+fi
+
+
 
 #Path to swiftDialog binary
 dialogPath='/usr/local/bin/dialog'
