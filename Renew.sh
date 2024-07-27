@@ -553,6 +553,18 @@ else
 	deadline=''
 fi
 
+# Set notification button options. If option is false, unset them
+notificationButtonOptions=(
+	--button1text "$dialogRestartButtonText"
+	--button1action "osascript -e 'tell app \"loginwindow\" to «event aevtrrst»'"
+)
+if "$pBuddy" -c "Print :NotificationButtonEnabled" "$renewConfig" >/dev/null 2>&1 ; then
+	notificationButtonEnabled=$("$pBuddy" -c "Print :NotificationButtonEnabled" "$renewConfig")
+	if ! "${notificationButtonEnabled}"; then
+		notificationButtonOptions=()
+	fi
+fi
+
 #Define what happens when Aggressive mode is engaged
 function exec_aggro_mode()
 {
@@ -621,6 +633,7 @@ log_message "Executing notification mode"
 	"$dialogPath" \
 	--notification \
 	--title "$dialogTitle" \
+	"${notificationButtonOptions[@]}" \
 	"$notificationIconCommand" "$notificationIcon" \
 	--message "$dialogNotificationMessage" \
 	$(echo $dialogAdditionalOptions) \
