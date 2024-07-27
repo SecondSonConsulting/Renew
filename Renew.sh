@@ -745,6 +745,8 @@ uptime_days="$(( uptime_hours / 24 ))"
 
 debug_message "Uptime values are: $uptime_days days = $uptime_hours hours = $uptime_minutes minutes = $uptime_seconds seconds"
 
+log_message "Uptime Days: $uptime_days"
+
 deferUntilSeconds=$((deferralDuration * 60 * 60 - 300))
 deferUntil=$((current_unix_time+deferUntilSeconds))
 
