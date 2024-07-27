@@ -11,6 +11,50 @@ scriptVersion="1.0.2"
 # This section sets up the basic variables, functions, and validation
 #
 ##################################################################
+#This is the help dialog explaining the options and how to use
+help_message()
+{
+cat <<HELPMESSAGE
+NAME
+	/usr/local/Renew.sh
+
+SYNOPSIS
+	/usr/local/Renew.sh [ --reset | --dry-run | --force-aggro | --force-normal | --force-notification | --help ]
+	
+DESCRIPTION
+	The Renew script is designed to be run on regular intervals (about every 30 minutes, typically via a Global Launch Agent).
+	In normal usage, no additional arguments are required. The Options below are primarily for testing.
+	
+	Multiple options are not supported, only one option can be chosen at a time.
+
+OPTIONS
+	--reset					This will reset the user's deferral profile to reset the Renew experience
+
+	--dry-run				Disables the restart/quit functionality of the "Restart" button for testing purposes.
+  				  			Also ignores active deferral count and sets uptime to ensure an event is triggered.
+
+	--force-aggro			Aggressive mode will be executed regardless of deferrals or uptime.
+
+	--force-normal			Normal mode will be executed regardless of deferrals or uptime.
+
+	--force-notification	Notification mode will be executed regardless of deferrals or uptime.
+
+	--version				Print the version of Renew and Dialog and exit.
+	
+	--help					Print this help message and exit.
+
+EXIT CODES
+	0						Successful exit
+	1						Unknown or undefined error
+	2						Permissions or home folder issue
+	3						SwiftDialog binary missing
+	4						Invalid arguments given at command line
+	*						Other undefined exit codes are most likely passed from SwiftDialog exiting improperly
+
+HELPMESSAGE
+
+}
+
 function check_not_root()
 {
 
@@ -109,6 +153,7 @@ fi
 #Exit if there is no mobileconfig payload
 if [ ! -f "$renewConfig" ]; then
 	log_message "Configuration profile missing. Exiting."
+	help_message
 	exit 0
 fi
 
@@ -126,50 +171,6 @@ else
 	echo "ERROR: Failed to properly right to $userDeferralProfile - Exiting."
 	exit 2
 fi
-
-#This is the help dialog explaining the options and how to use
-help_message()
-{
-cat <<HELPMESSAGE
-NAME
-	/usr/local/Renew.sh
-
-SYNOPSIS
-	/usr/local/Renew.sh [ --reset | --dry-run | --force-aggro | --force-normal | --force-notification | --help ]
-	
-DESCRIPTION
-	The Renew script is designed to be run on regular intervals (about every 30 minutes, typically via a Global Launch Agent).
-	In normal usage, no additional arguments are required. The Options below are primarily for testing.
-	
-	Multiple options are not supported, only one option can be chosen at a time.
-
-OPTIONS
-	--reset					This will reset the user's deferral profile to reset the Renew experience
-
-	--dry-run				Disables the restart/quit functionality of the "Restart" button for testing purposes.
-  				  			Also ignores active deferral count and sets uptime to ensure an event is triggered.
-
-	--force-aggro			Aggressive mode will be executed regardless of deferrals or uptime.
-
-	--force-normal			Normal mode will be executed regardless of deferrals or uptime.
-
-	--force-notification	Notification mode will be executed regardless of deferrals or uptime.
-
-	--version				Print the version of Renew and Dialog and exit.
-	
-	--help					Print this help message and exit.
-
-EXIT CODES
-	0						Successful exit
-	1						Unknown or undefined error
-	2						Permissions or home folder issue
-	3						SwiftDialog binary missing
-	4						Invalid arguments given at command line
-	*						Other undefined exit codes are most likely passed from SwiftDialog exiting improperly
-
-HELPMESSAGE
-
-}
 
 ##################################################################
 #
