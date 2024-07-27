@@ -700,7 +700,7 @@ fi
 checkForAssertion=$(pmset -g | grep "display sleep prevented by"| sed 's/.*(\(.*\))/\1/' | sed 's/display sleep prevented by //'| sed 's/,//g')
 
 for i in "${assertionsToIgnore[@]}"; do
-	checkForAssertion=$(echo "$checkForAssertion" | sed "s/$i//" | xargs )
+	checkForAssertion=$(echo "$checkForAssertion" | sed "s/$i//g" | xargs )
 done
 	
 if [ -n "$checkForAssertion" ]; then
