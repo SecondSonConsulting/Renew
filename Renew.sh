@@ -555,12 +555,11 @@ fi
 
 # Set notification button options. If option is false, unset them
 notificationButtonOptions=(
-	--button1text "$dialogRestartButtonText"
 	--button1action "osascript -e 'tell app \"loginwindow\" to «event aevtrrst»'"
 )
-if "$pBuddy" -c "Print :NotificationButtonEnabled" "$renewConfig" >/dev/null 2>&1 ; then
-	notificationButtonEnabled=$("$pBuddy" -c "Print :NotificationButtonEnabled" "$renewConfig")
-	if ! "${notificationButtonEnabled}"; then
+if "$pBuddy" -c "Print :NotificationActionEnabled" "$renewConfig" >/dev/null 2>&1 ; then
+	notificationActionEnabled=$("$pBuddy" -c "Print :NotificationActionEnabled" "$renewConfig")
+	if ! "${notificationActionEnabled}"; then
 		notificationButtonOptions=()
 	fi
 fi
