@@ -1,7 +1,5 @@
 v2.0 Change Log
 
-LOOK THROUGH YOUR SHIT FROM THE OTHER NIGHT
-
 ## New Features
 - New Default Behavior: Clicking the Dialog notification will initiate the restart window
     - This can be disabled in the profile with new OptionalArguments boolean key set to `false`: `NotificationActionEnabled`
