@@ -787,6 +787,8 @@ function process_user_selection()
 
 function check_assertions()
 {
+	check_user_idle
+
 	## Thank you @Pico for the commands to check for the screen being awake and unlocked
 	# Check if the screen is asleep. Exit quietly without a deferral if it s not awake.
 	if [[ "$(osascript -l 'JavaScript' -e 'ObjC.import("CoreGraphics"); $.CGDisplayIsActive($.CGMainDisplayID())')" == '1' ]]; then
@@ -820,12 +822,17 @@ function check_assertions()
 
 }
 
-##################################################################
-#
-# This section does maths
-#
-##################################################################
+function check_user_idle(){
+	systemIdleTime=$(/usr/sbin/ioreg -c IOHIDSystem | /usr/bin/awk '/HIDIdleTime/ {print int($NF/1000000000); exit}')
+	if [ "$systemIdleTime" -gt 3600 ]; then
+		log_message "System has been idle for $(( systemIdleTime / 60 )) minutes. Exiting"
+		exit 0
+	fi
+}
 
+#################
+#	The Maths	#
+#################
 ### Big thanks to Pico on the Mac Admins slack for the logic on the time variables.
 # Determine current Unix epoch time
 current_unix_time="$(date '+%s')"

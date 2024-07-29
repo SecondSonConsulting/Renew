@@ -24,7 +24,7 @@ v2.0 Change Log
     - `--configuration /path/to/renew.plist` allows you to specify a file you wish to use as the configuration for that run.
         - This is intended for use in testing, though, there's nothing stopping you from using this option with a LaunchAgent or from your management tool
         - This argument overrides any MDM profile or configuration file for that run
-    
+- Renew no longer processes deferrals/events if the system has been idle from human input for over 60 minutes
 
 ## Housekeeping
 - Renew is now published under the MIT open-source license
