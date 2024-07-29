@@ -10,9 +10,13 @@ scriptVersion="2.0beta1"
 # With Contributions by:
 # 	@drtaru
 #	@aschwanb
+
+# Language Contributions by:
+#	@martinc
 #	@ConstantinLorenz
 #	@toni-boettcher
-#	
+#	@devliegereM
+#
 #	And others in the Mac Admins community
 
 # MIT License
@@ -370,7 +374,6 @@ fi
 case "$languageChoice" in
 	fr)
 		#Define script default messaging FRENCH
-		#Credit and thanks to Martin Cech (@martinc on MacAdmins Slack)
 		defaultDialogTitle="Veuillez redemarrer"
 		defaultDialogNormalMessage="Afin de garder votre système sain et sécurisé, il doit être redémarré.  \n**Veuillez enregistrer votre travail** et redemarrer dès que possible."
 		defaultDialogAggroMessage="**Veuillez enregistrer votre travail et redémarrer**"
@@ -413,7 +416,17 @@ case "$languageChoice" in
 		defaultNoDeferralsRemainingButtonText="Keine weitere Aufschiebung möglich"
 		defaultDeferralMessage="Deferrals remaining until required restart: "
    ;;
-    *)
+	nl)
+		defaultDialogTitle="Opnieuw opstarten a.u.b."
+		defaultDialogNormalMessage="Om uw systeem gezond en veilig te houden moet het opnieuw worden opgestart.  \n **Sla uw werk op** en start zo snel mogelijk opnieuw op."
+		defaultDialogAggroMessage="**Sla uw werk op en start opnieuw op**"
+		defaultDialogNotificationMessage="Om uw systeem gezond en veilig te houden moet het opnieuw worden opgestart.  \nSla uw werk op en start zo snel mogelijk opnieuw op."
+		defaultRestartButtonText="OK, herstart nu ik klaar ben".
+		defaultDeferralButtonText="Niet nu, herinner me er later aan..."
+		defaultNoDeferralsRemainingButtonText="Geen uitstel meer".
+		defaultDeferralMessage="Resterende uitstellen tot vereiste herstart: "
+	;;
+	*)
 		##English is the default and fallback language
 		#Define script default messaging ENGLISH
 		defaultDialogTitle="Please Restart"
