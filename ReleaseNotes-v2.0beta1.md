@@ -6,6 +6,8 @@ LOOK THROUGH YOUR SHIT FROM THE OTHER NIGHT
 - New Default Behavior: Clicking the Dialog notification will initiate the restart window
     - This can be disabled in the profile with new OptionalArguments boolean key set to `false`: `NotificationActionEnabled`
     - `--dryrun` argument disables this for that run
+- Language support for Dutch (nl)
+    - Thank you, @DevliegereM!
 
 ## Improvements
 - Argument Processing rewritten
