@@ -6,6 +6,14 @@
 scriptVersion="2.0beta1"
 
 # Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
+# 
+# With Contributions by:
+# 	@drtaru
+#	@aschwanb
+#	@ConstantinLorenz
+#	@toni-boettcher
+#	
+#	And others in the Mac Admins community
 
 # MIT License
 #
