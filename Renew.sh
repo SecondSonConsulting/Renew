@@ -344,6 +344,17 @@ case "$languageChoice" in
        defaultNoDeferralsRemainingButtonText="Keine weitere Aufschiebung möglich"
 		defaultDeferralMessage="Deferrals remaining until required restart: "
    ;;
+   nb)
+		#Define script default messaging NORSK
+		defaultDialogTitle="Vennligst restart din Mac"
+		defaultDialogNormalMessage="For å holde systemet ditt ved like og sikkert, må det startes på nytt.  \n**Vennligst lagre arbeidet ditt** og start på nytt så snart som mulig."
+		defaultDialogAggroMessage="**Vennligst lagre arbeidet ditt og start på nytt**"
+		defaultDialogNotificationMessage="For å holde systemet ditt ved like og sikkert, må det startes på nytt.  \nVennligst lagre arbeidet ditt og start på nytt så snart som mulig."
+		defaultRestartButtonText="OK, start på nytt nå."
+		defaultDeferralButtonText="Ikke nå, minne meg på det senere..."
+		defaultNoDeferralsRemainingButtonText="Ikke mulig å utsette"
+		defaultDeferralMessage="Antall mulige utsettelser før påkrevd omstart: "
+    ;;
     *)
         ##English is the default and fallback language
 		#Define script default messaging ENGLISH
