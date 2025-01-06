@@ -65,6 +65,7 @@ OPTIONS
 
 	--dry-run				Disables the restart/quit functionality of the "Restart" button for testing purposes.
   				  			Also ignores active deferral count and sets uptime to ensure an event is triggered.
+							Also disables notification action button.
 
 	--force-aggro			Aggressive mode will be executed regardless of deferrals or uptime.
 
@@ -73,15 +74,31 @@ OPTIONS
 	--force-notification	Notification mode will be executed regardless of deferrals or uptime.
 
 	--version				Print the version of Renew and Dialog and exit.
+
+	--verbose				Enable verbose mode for debugging.
+
+	--configuration <path>	Load a custom configuration plist (not mobileconfig) file from the specified path.
+
+	--print-configuration	Display the active configuration and exit.
+
+	--defer <minutes>		Force a deferral for the specified number of minutes. This will reset the deferral profile.
+
+	--deadline <days>		Set the deadline for the restart to the specified number of days.
+
+	--language <language>	Set the language for the dialog. This will override the system language.
 	
 	--help					Print this help message and exit.
 
+TESTING TIPS
+	Use the secret quit key to exit the dialog without restarting. The default is "Command ]".
+	
 EXIT CODES
 	0						Successful exit
 	1						Unknown or undefined error
 	2						Permissions or home folder issue
 	3						SwiftDialog binary missing
 	4						Invalid arguments given at command line
+	5						Script executed as root
 	*						Other undefined exit codes are most likely passed from SwiftDialog exiting improperly
 
 HELPMESSAGE
@@ -102,7 +119,7 @@ fi
 # Check we are NOT running as root
 if [[ $(id -u) = 0 ]]; then
   echo "ERROR: This script should never be run as root **EXITING**"
-  exit 1
+  exit 5
 fi
 
 #############
