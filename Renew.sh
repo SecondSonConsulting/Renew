@@ -3,7 +3,7 @@
 # shellcheck shell=bash
 
 ## Renew.sh
-scriptVersion="1.2"
+scriptVersion="1.2beta2"
 
 # Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 # 
@@ -250,7 +250,7 @@ while [ -n "${1}" ]; do
 		;;
 		--deadline)
 			log_message "Setting Deadline from argument: $2"
-			deadline="$2"
+			deadlineFromArgument="$2"
 			shift
 		;;
 		--language)
@@ -631,7 +631,9 @@ else
 fi
 
 # Set deadline from configuration profile
-if [ -z "$deadline" ] && "$pBuddy" -c "Print :OptionalArguments:Deadline" "$renewConfig" >/dev/null 2>&1 ; then
+if [ -n "$deadlineFromArgument" ]; then
+	deadline="$deadlineFromArgument"
+elif [ -z "$deadline" ] && "$pBuddy" -c "Print :OptionalArguments:Deadline" "$renewConfig" >/dev/null 2>&1 ; then
 	# If we're using a test mode, set deadline to a very high value. Otherwise, set it to the configuration value
 	if [ "$forceNormal" = 1 ] || [ "$forceNotification" = 1 ] || [ "$forceAggro" = 1 ] ; then
 		log_message "Setting deadline to 999 for testing"
