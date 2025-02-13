@@ -1,5 +1,7 @@
 # Renew
 
+<img src="Example Screenshots/Renew.png" alt="Renew icon" width="500" height="500">
+
 See our [wiki](https://github.com/SecondSonConsulting/Renew/wiki) for installation details and information on how the tool works. 
 
 ## Overview
