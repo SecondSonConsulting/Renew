@@ -3,7 +3,7 @@
 # shellcheck shell=bash
 
 ## Renew.sh
-scriptVersion="1.2beta2"
+scriptVersion="1.3"
 
 # Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 # 
@@ -540,6 +540,7 @@ fi
 #Now do the logic to set the variables that will actually be used
 #This is tedious code that could be simplified with a function, but i couldn't get my brain around it
 #How do you set a variable to have the name of a argument you pass to a function? Need someone smarter than me to clue me in on that one.
+# - `eval`... the answer is eval... but I'm not putting in the effort to do that here right now. Irony being that eval is used unnecessarily in this script already.
 
 if "$pBuddy" -c "Print :OptionalArguments:NormalMessage" "$renewConfig" >/dev/null 2>&1 ; then
 	dialogNormalMessage=$("$pBuddy" -c "Print :OptionalArguments:NormalMessage" "$renewConfig")
