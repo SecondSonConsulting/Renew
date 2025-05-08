@@ -940,7 +940,7 @@ fi
 # Check if we're forcing notification for testing
 if [ "$forceNotification" = 1 ]; then
 	activeDeferral=0
-	log_message "FORCE-NOTIFICAION: Setting activeDeferral to $activeDeferral for testing purposes."
+	log_message "FORCE-NOTIFICATION: Setting activeDeferral to $activeDeferral for testing purposes."
 	exec_notification_mode
 fi
 
