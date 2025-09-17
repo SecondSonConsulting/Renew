@@ -659,6 +659,35 @@ if [ "$dryRun" = 1 ]; then
 fi
 
 function add_final_dialog_options(){
+
+	# function to swap one token in one variable
+	swap_token() {
+		# $1 is the name of the variable we want to process
+		# $2 is the token we're looking to swap out
+		# $3 is the variable we want to swap in place of the token
+		local variableToSwap=$1 token=$2 value=$3
+		eval "$variableToSwap=\"\${$variableToSwap//\{$token\}/$value}\""
+	}
+
+	# List of variables to swap our tokens
+	tokenSwapVarsList=(
+	dialogAggroMessage
+	dialogNormalMessage
+	dialogNotificationMessage
+	dialogTitle
+	subtitleOptions
+	dialogNoDeferralsRemainingButtonText
+	dialogDeferralButtonText
+	dialogRestartButtonText
+	)
+
+	# Swap in the token contents for each variable in our list
+	for varSwap in "${tokenSwapVarsList[@]}"; do
+		swap_token "$varSwap" uptime "$uptime_days"
+		swap_token "$varSwap" deferralcount "$currentDeferralCount"
+		swap_token "$varSwap" deferralsremaining "$deferralsRemaining"
+	done
+
 	# If BannerImage has a value, add it to the additional options array. Do this here, so that these options aren't added to notifications.
 	if [ -n "$bannerImage" ]; then
 		dialogAdditionalOptions+=("--bannerimage" "$bannerImage")
@@ -671,7 +700,7 @@ function add_final_dialog_options(){
 	if [ -n "$subtitleOptions" ]; then
 		dialogNotificationOptions+=("--subtitle" "$subtitleOptions")
 	fi
-
+	
 }
 
 #################
