@@ -614,7 +614,7 @@ if "$pBuddy" -c "Print :OptionalArguments:AdditionalNotificationOptions" "$renew
 else
 	dialogNotificationOptions="$defaultDialogNotificationOptions"
 fi
-echo "#^^MARK1 SUBTITLES"
+
 if "$pBuddy" -c "Print :OptionalArguments:NotificationSubtitle" "$renewConfig" >/dev/null 2>&1 ; then
 	subtitleOptions=$("$pBuddy" -c "Print :OptionalArguments:NotificationSubtitle" "$renewConfig")
 else
@@ -667,7 +667,6 @@ function add_final_dialog_options(){
 	if [ -n "$notificationIcon" ]; then
 		dialogNotificationOptions+=("--icon" "$notificationIcon")
 	fi
-	echo "#^^MARK2 SUBTITLES"
 
 	if [ -n "$subtitleOptions" ]; then
 		dialogNotificationOptions+=("--subtitle" "$subtitleOptions")
