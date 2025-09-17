@@ -3,7 +3,7 @@
 # shellcheck shell=bash
 
 ## Renew.sh
-scriptVersion="1.4beta1"
+scriptVersion="1.4beta2"
 
 # Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 # 
@@ -355,13 +355,19 @@ notificationCount=$("$pBuddy" -c "Print :NotificationCount" "$userDeferralProfil
 # Do math to determine remaining deferrals
 deferralsRemaining=$((maximumDeferrals-currentDeferralCount))
 
-# Setting variables based on mobileconfig profile - OptionalArguments
+# Setting arrays based on mobileconfig profile - OptionalArguments
 # If no argument is given in the config file, set the script default
-defaultDialogAdditionalOptions=""
-defaultDialogAggressiveOptions=""
-defaultDialogNormalOptions=""
-defaultDialogNotificationOptions=""
-defaultSubtitleOptions=""
+
+# Initialize arrays
+typeset -a defaultDialogAdditionalOptions=()
+typeset -a defaultDialogAggressiveOptions=()
+typeset -a defaultDialogNormalOptions=()
+typeset -a defaultDialogNotificationOptions=()
+typeset -a defaultSubtitleOptions=()
+typeset -a dialogAdditionalOptions=()
+typeset -a dialogNormalOptions=()
+typeset -a dialogAggressiveOptions=()
+typeset -a dialogNotificationOptions=()
 defaultSecretQuitKey="]"
 defaultNotificationIcon=""
 
@@ -511,12 +517,6 @@ if [ "$darkMode" = "enabled" ] && "$pBuddy" -c "Print :OptionalArguments:BannerI
 	bannerImage=$("$pBuddy" -c "Print :OptionalArguments:BannerImageDarkMode" "$renewConfig")
 fi
 
-if [ -z "$bannerImage" ]; then
-	bannerCommand=''
-else
-	bannerCommand="--bannerimage"
-fi
-
 #Now do the same thing for a notification icon. We need some extra tidbits to just not include the --icon flag at all if it isn't defined in the config
 #Define the notification icon variable as empty
 notificationIcon=''
@@ -529,12 +529,6 @@ fi
 #If Dark mode is enabled and a NotificationIconDarkMode is defined in the configuration profile, set our variable to use it.
 if [ "$darkMode" = "enabled" ] && "$pBuddy" -c "Print :OptionalArguments:NotificationIconDarkMode" "$renewConfig" >/dev/null 2>&1 ; then
 	notificationIcon=$("$pBuddy" -c "Print :OptionalArguments:NotificationIconDarkMode" "$renewConfig")
-fi
-
-if [ -z "$notificationIcon" ]; then
-	notificationIconCommand=''
-else
-	notificationIconCommand="--icon"
 fi
 
 #Now do the logic to set the variables that will actually be used
@@ -590,21 +584,29 @@ else
 fi
 
 if "$pBuddy" -c "Print :OptionalArguments:AdditionalDialogOptions" "$renewConfig" >/dev/null 2>&1 ; then
-	dialogAdditionalOptions=$("$pBuddy" -c "Print :OptionalArguments:AdditionalDialogOptions" "$renewConfig")
+	dialogAdditionalOptionsString=$("$pBuddy" -c "Print :OptionalArguments:AdditionalDialogOptions" "$renewConfig")
+	dialogAdditionalOptions=()
+	# This is how we split a single variable value (as read from our profile) into multiple entries in an array
+	eval 'for argument in '$dialogAdditionalOptionsString'; do dialogAdditionalOptions+=$argument; done'
 else
-	dialogAdditionalOptions="$defaultDialogAdditionalOptions"
+	dialogAdditionalOptions+=($defaultDialogAdditionalOptions)
 fi
 
 if "$pBuddy" -c "Print :OptionalArguments:AdditionalAggressiveOptions" "$renewConfig" >/dev/null 2>&1 ; then
-	dialogAggressiveOptions=$("$pBuddy" -c "Print :OptionalArguments:AdditionalAggressiveOptions" "$renewConfig")
+	dialogAggressiveOptionsString=$("$pBuddy" -c "Print :OptionalArguments:AdditionalAggressiveOptions" "$renewConfig")
+	# This is how we split a single variable value (as read from our profile) into multiple entries in an array
+	eval 'for argument in '$dialogAggressiveOptionsString'; do dialogAggressiveOptions+=$argument; done'
+
 else
-	dialogAggressiveOptions="$defaultDialogAggressiveOptions"
+	dialogAggressiveOptions+="$defaultDialogAggressiveOptions"
 fi
 
 if "$pBuddy" -c "Print :OptionalArguments:AdditionalNormalOptions" "$renewConfig" >/dev/null 2>&1 ; then
-	dialogNormalOptions=$("$pBuddy" -c "Print :OptionalArguments:AdditionalNormalOptions" "$renewConfig")
+	dialogNormalOptionsString=$("$pBuddy" -c "Print :OptionalArguments:AdditionalNormalOptions" "$renewConfig")
+	# This is how we split a single variable value (as read from our profile) into multiple entries in an array
+	eval 'for argument in '$dialogNormalOptionsString'; do dialogNormalOptions+=$argument; done'
 else
-	dialogNormalOptions="$defaultDialogNormalOptions"
+	dialogNormalOptions+="$defaultDialogNormalOptions"
 fi
 
 if "$pBuddy" -c "Print :OptionalArguments:AdditionalNotificationOptions" "$renewConfig" >/dev/null 2>&1 ; then
@@ -623,12 +625,6 @@ if "$pBuddy" -c "Print :OptionalArguments:SecretQuitKey" "$renewConfig" >/dev/nu
 	secretQuitKey=$("$pBuddy" -c "Print :OptionalArguments:SecretQuitKey" "$renewConfig")
 else
 	secretQuitKey="$defaultSecretQuitKey"
-fi
-
-if [ -z "$subtitleOptions" ]; then
-	subtitleCommand=''
-else
-	subtitleCommand="--subtitle"
 fi
 
 # Set deadline from configuration profile
@@ -662,6 +658,22 @@ if [ "$dryRun" = 1 ]; then
 	notificationButtonOptions=()
 fi
 
+function add_final_dialog_options(){
+	# If BannerImage has a value, add it to the additional options array. Do this here, so that these options aren't added to notifications.
+	if [ -n "$bannerImage" ]; then
+		dialogAdditionalOptions+=("--bannerimage" "$bannerImage")
+	fi
+
+	if [ -n "$notificationIcon" ]; then
+		dialogNotificationOptions+=("--icon" "$notificationIcon")
+	fi
+
+	if [ -n "$subtitleOptions" ]; then
+		dialogNotificationOptions+=("--subtitle" "$subtitleOptions")
+	fi
+
+}
+
 #################
 #	Run Modes	#
 #################
@@ -674,6 +686,7 @@ log_message "Executing aggressive mode"
 
 # go aggro
 	check_assertions
+	# shellcheck disable=SC2068
 
 	"$dialogPath" \
 	--title "$dialogTitle" \
@@ -681,13 +694,12 @@ log_message "Executing aggressive mode"
 	--button1disabled \
 	--infobuttontext "$dialogRestartButtonText" \
 	--icon "$dialogIcon" \
-	"$bannerCommand" "$bannerImage" \
 	--messagealignment centre \
 	--centericon \
 	--messagealignment center \
 	--quitkey "$secretQuitKey" \
-	$(echo $dialogAdditionalOptions) \
-	$(echo $dialogAggressiveOptions) \
+	${dialogAdditionalOptions[@]} \
+	${dialogAggressiveOptions[@]} \
 	--message "$dialogAggroMessage" \
 	
 	# Set exit code based on user input
@@ -704,6 +716,7 @@ log_message "Executing normal mode"
 
 # go normal
 	check_assertions
+	# shellcheck disable=SC2068
 
 	"$dialogPath" \
 	--title "$dialogTitle" \
@@ -711,11 +724,10 @@ log_message "Executing normal mode"
 	--button1text "$dialogDeferralButtonText" \
 	--centericon \
 	--icon "$dialogIcon" \
-	"$bannerCommand" "$bannerImage" \
 	--messagealignment centre \
 	--quitkey "$secretQuitKey" \
-	$(echo $dialogAdditionalOptions) \
-	$(echo $dialogNormalOptions) \
+	${dialogAdditionalOptions[@]} \
+	${dialogNormalOptions[@]} \
 	--message "$dialogNormalMessage" \
 
 	# Set exit code based on user input
@@ -730,16 +742,16 @@ log_message "Executing notification mode"
 
 # go notification
 	check_assertions
+	# shellcheck disable=SC2068
+
 	"$dialogPath" \
 	--notification \
 	--title "$dialogTitle" \
 	"${notificationButtonOptions[@]}" \
-	"$notificationIconCommand" "$notificationIcon" \
 	--message "$dialogNotificationMessage" \
-	$(echo $dialogAdditionalOptions) \
-	$(echo $dialogNotificationOptions) \
-	"$subtitleCommand" "$subtitleOptions"
-	
+	${dialogAdditionalOptions[@]} \
+	${dialogNotificationOptions[@]} \
+
 	((notificationCount=notificationCount+1))
 	"$pBuddy" -c "Set :NotificationCount $notificationCount" "$userDeferralProfile"
 	
@@ -793,6 +805,8 @@ done
 
 # Default Ignore List
 assertionsToIgnore+="obs"
+assertionsToIgnore+="OBS"
+assertionsToIgnore+="zoom.us"
 assertionsToIgnore+="Amphetamine"
 assertionsToIgnore+="caffeinate"
 
@@ -891,6 +905,8 @@ deferUntil=$((current_unix_time+deferUntilSeconds))
 debug_message "Defer Until: $deferUntil which is $(date -j -f %s $deferUntil)"
 humanReadableDeferDate=$(date -j -f %s $deferUntil)
 
+add_final_dialog_options
+
 ##################################################################
 #
 # This section processes disabled RequiredArguments
@@ -955,7 +971,7 @@ if [ -n "$forceDeferralMinutes" ]; then
 fi
 
 #############################################
-#	Primary Script Behavioro Starts Here	#
+#	Primary Script Behavior Starts Here	#
 #############################################
 log_message "Executing Uptime Logic"
 
