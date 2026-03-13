@@ -105,10 +105,17 @@ HELPMESSAGE
 
 }
 
-# Check if we're running in verbose mode
-if echo "$@" | grep -q '\-\-verbose'; then
-	set -x
-fi
+# Track verbose mode and enable xtrace early if requested.
+verboseMode=0
+for argument in "$@"; do
+	case "$argument" in
+		--verbose|-v)
+			verboseMode=1
+			set -x
+			break
+		;;
+	esac
+done
 
 # This is up top so that it runs even if no validation succeeds.
 if echo "$@" | grep -q '\-\-version'; then
@@ -155,7 +162,9 @@ logFile="$logDir"/Renew.log
 # These messages will only be see in verbose mode
 function debug_message()
 {
-	/bin/echo "DEBUG: $*" > /dev/null 2>&1
+	if [ "$verboseMode" = 1 ]; then
+		/bin/echo "DEBUG: $*"
+	fi
 }
 
 # Publish a message to the log (and also to the debug channel)
@@ -221,6 +230,7 @@ while [ -n "${1}" ]; do
 			exit 0
 		;;
 		--verbose|-v)
+			verboseMode=1
 			set -x
 		;;
 		--configuration)
@@ -841,7 +851,7 @@ assertionsToIgnore+="caffeinate"
 function process_user_selection()
 {
 	# User has made a selection. Now we process it.
-	debug_message "DIALOG EXIT CODE: $dialogExitCode."
+	log_message "DIALOG EXIT CODE: $dialogExitCode."
 
 	if [[ "$dialogExitCode" = 0 ]]; then
 		log_message "USER ACTION: User chose deferral."
@@ -891,7 +901,7 @@ function check_assertions()
 		log_message "Display sleep assertion(s) identified: $checkForAssertion ... Exiting."
 		exit 0
 	else
-		debug_message "No assertions stopping us from notifying."
+		log_message "No assertions stopping us from notifying."
 	fi
 
 }
@@ -1011,7 +1021,7 @@ fi
 
 # Is a Deadline set? If so, check and run logic.
 if [ -n "$deadline" ] && [ "$uptime_days" -ge "$deadline" ]; then
-	debug_message "Deadline is past"
+	log_message "Deadline is past"
 	exec_aggro_mode
 	process_user_selection
 	exit 0
@@ -1021,15 +1031,15 @@ fi
 if [ "$uptime_days" -ge "$uptimeThreshold" ]; then
 	# First check if the user has received the desired number of notifications, and if not execute notification mode.
 	if [ "$notificationCount" -lt "$notificationThreshold" ]; then
-		debug_message "Notification count has not met notification threshold."
+		log_message "Notification count has not met notification threshold."
 		exec_notification_mode
 	fi
 	
 	if [ "$currentDeferralCount" -ge "$maximumDeferrals" ]; then
-		debug_message "Aggressive mode conditions met."
+		log_message "Aggressive mode conditions met."
 		exec_aggro_mode
 	else
-		debug_message "Normal mode conditions met."
+		log_message "Normal mode conditions met."
 		exec_normal_mode
 	fi
 	process_user_selection
