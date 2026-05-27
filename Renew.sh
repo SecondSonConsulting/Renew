@@ -3,7 +3,7 @@
 # shellcheck shell=bash
 
 ## Renew.sh
-scriptVersion="1.5.1"
+scriptVersion="1.5.99.beta1"
 
 # Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 # 
@@ -198,6 +198,8 @@ if [ ! -e "$dialogPath" ]; then
 	exit 3
 fi
 
+dialogVersion="$(/usr/local/bin/dialog --version)"
+
 # Confirm read/write permissions to the user deferral profile
 if "$pBuddy" -c "Add :TestPerms integer 0" "$userDeferralProfile" >/dev/null 2>&1; then
 	"$pBuddy" -c "Delete :TestPerms" "$userDeferralProfile" >/dev/null 2>&1
@@ -379,7 +381,7 @@ typeset -a dialogNormalOptions=()
 typeset -a dialogAggressiveOptions=()
 typeset -a dialogNotificationOptions=()
 defaultSecretQuitKey="]"
-defaultNotificationIcon=""
+defaultNotificationStyle="pseudo-alert"
 
 #########################
 #	Language Support	#
@@ -637,6 +639,12 @@ else
 	secretQuitKey="$defaultSecretQuitKey"
 fi
 
+if "$pBuddy" -c "Print :OptionalArguments:NotificationStyle" "$renewConfig" >/dev/null 2>&1 ; then
+	notificationStyle=$("$pBuddy" -c "Print :OptionalArguments:NotificationStyle" "$renewConfig")
+else
+	notificationStyle="$defaultNotificationStyle"
+fi
+
 # Set deadline from configuration profile
 if [ -n "$deadlineFromArgument" ]; then
 	deadline="$deadlineFromArgument"
@@ -710,6 +718,17 @@ function add_final_dialog_options(){
 	if [ -n "$subtitleOptions" ]; then
 		dialogNotificationOptions+=("--subtitle" "$subtitleOptions")
 	fi
+
+	# Handle macOS 26.4+ and Dialog 3.1+ notification shenanigans
+	autoload is-at-least
+	if is-at-least 3.1 "$dialogVersion"; then
+		dialogNotificationOptions+=("--style")
+		dialogNotificationOptions+=("$notificationStyle")
+		log_message "Dialog is version 3.1 or greater ($dialogVersion), using style: $notificationStyle"
+	else
+		log_message "Dialog is below 3.1 (version: $dialogVersion), using native Dialog notifications"
+	fi
+
 	
 }
 
