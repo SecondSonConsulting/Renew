@@ -3,7 +3,7 @@
 # shellcheck shell=bash
 
 ## Renew.sh
-scriptVersion="1.5.1"
+scriptVersion="1.5.99.beta1"
 
 # Written by Trevor Sysock (aka @BigMacAdmin) at Second Son Consulting Inc.
 # 
