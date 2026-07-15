@@ -117,16 +117,20 @@ for argument in "$@"; do
 	esac
 done
 
-# Only configuration printing is allowed when running as root.
+# Allow us to run as root only if --print-configuration is passed
+# In addition, only --verbose and --configuration are allowed options when running in this mode
 printConfigMode=0
 rootPrintConfigOnly=1
 expectConfigPath=0
+# Loop through arguments
 for argument in "$@"; do
+	# If we're expecting the path to a config, skip checking this one
 	if [[ "$expectConfigPath" = 1 ]]; then
 		expectConfigPath=0
 		continue
 	fi
 
+	# Is this argument on the "approved to run as root" list?
 	case "$argument" in
 		--verbose|-v)
 		;;
@@ -142,6 +146,7 @@ for argument in "$@"; do
 	esac
 done
 
+# Sanity check we didn't end with a bad `--configuration` argument with no path
 if [[ "$expectConfigPath" = 1 ]]; then
 	rootPrintConfigOnly=0
 fi
