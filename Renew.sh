@@ -117,6 +117,40 @@ for argument in "$@"; do
 	esac
 done
 
+# Allow us to run as root only if --print-configuration is passed
+# In addition, only --verbose and --configuration are allowed options when running in this mode
+printConfigMode=0
+rootPrintConfigOnly=1
+expectConfigPath=0
+# Loop through arguments
+for argument in "$@"; do
+	# If we're expecting the path to a config, skip checking this one
+	if [[ "$expectConfigPath" = 1 ]]; then
+		expectConfigPath=0
+		continue
+	fi
+
+	# Is this argument on the "approved to run as root" list?
+	case "$argument" in
+		--verbose|-v)
+		;;
+		--configuration)
+			expectConfigPath=1
+		;;
+		--print-configuration|--print)
+			printConfigMode=1
+		;;
+		*)
+			rootPrintConfigOnly=0
+		;;
+	esac
+done
+
+# Sanity check we didn't end with a bad `--configuration` argument with no path
+if [[ "$expectConfigPath" = 1 ]]; then
+	rootPrintConfigOnly=0
+fi
+
 # This is up top so that it runs even if no validation succeeds.
 if echo "$@" | grep -q '\-\-version'; then
 	echo "$scriptVersion"
@@ -124,7 +158,8 @@ if echo "$@" | grep -q '\-\-version'; then
 fi
 
 # Check we are NOT running as root
-if [[ $(id -u) = 0 ]]; then
+if [[ $(id -u) = 0 \
+	&& ("$printConfigMode" != 1 || "$rootPrintConfigOnly" != 1) ]]; then
   echo "ERROR: This script should never be run as root **EXITING**"
   exit 5
 fi
